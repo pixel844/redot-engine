@@ -1,0 +1,7 @@
+Import("env")
+
+files = [
+    "os_3ds.cpp"
+]
+
+prog = env.add_program("#bin/godot", files)

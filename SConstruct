@@ -133,7 +133,7 @@ platform_arg = ARGUMENTS.get("platform", ARGUMENTS.get("p", False))
 
 if platform_arg == "android":
     custom_tools = ["clang", "clang++", "as", "ar", "link"]
-elif platform_arg == "web":
+elif platform_arg == "web" or platform_arg == "3ds":
     # Use generic POSIX build toolchain for Emscripten.
     custom_tools = ["cc", "c++", "ar", "link", "textfile", "zip"]
 elif os.name == "nt" and methods.get_cmdline_bool("use_mingw", False):
