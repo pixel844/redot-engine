@@ -27,6 +27,17 @@ def get_opts():
 
 def get_flags():
 	return [
+		("tools", False),
+		("module_glslang_enabled",False),
+		('module_svg_enabled',False),
+		('module_upnp_enabled',False),
+		('module_vhacd_enabled',False),
+		("builtin_pcre2_with_jit", False),
+		('builtin_mbedtls', False),
+		('builtin_miniupnpc',False),
+		('vulkan',False),
+		('gles3', False),
+		('unix',False)
 	]
 
 
@@ -49,18 +60,19 @@ def configure_target(env):
 
 def configure_misc(env):
 	dkp_path = os.getenv("DEVKITPRO")
+	if env["PLATFORM"] == "win32":
+		env.use_windows_spawn_fix()
 	env.Append(CPPPATH=['#platform/3ds'])
 	env.Append(CCFLAGS=['-g','-Wall','-mword-relocations','-ffunction-sections', '-fno-exceptions', '-std=gnu++17'])
-	env.Append(CCFLAGS=['-D__3DS__','-DNEED_LONG_INT', '-DLIBC_FILEIO_ENABLED','-DNO_SAFE_CAST'])
-	env.Append(CPPPATH=[dkp_path +"/portlibs/armv6k/include", dkp_path +
-               "/portlibs/3ds/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
+	env.Append(CCFLAGS=['-D__3DS__', '-DLIBC_FILEIO_ENABLED','-DNO_SAFE_CAST','-DNEED_LONG_INT'])
+	env.Append(CCFLAGS=['-DUNIX_SOCKET_UNAVAILABLE'])
+	env.Append(CPPPATH=[dkp_path +"/portlibs/3ds/include",dkp_path +"/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
 	env.Append(LIBPATH=[dkp_path+"/portlibs/armv6k/lib", dkp_path +
                "/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])
 	env.Append(LINKFLAGS=['-specs=3dsx.specs', '-g'])
-	env.Append(LIBS=['pthread','citro3d','ctru','bz2','png', 'z'])
+	env.Append(LIBS=['citro3d','ctru','bz2','png', 'z','mbedtls'])
 
 def configure(env):
-	env.msvc = False
 	configure_arch(env)
 	configure_cross(env)
 	configure_target(env)

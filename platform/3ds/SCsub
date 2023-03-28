@@ -1,7 +1,9 @@
 Import("env")
 
 files = [
-    "os_3ds.cpp"
+    "godot_3ds.cpp",
+    "os_3ds.cpp",
+    "platform_thread.cpp"
 ]
 
 prog = env.add_program("#bin/godot", files)

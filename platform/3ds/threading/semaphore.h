@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  platform_config.h                                                     */
+/*  semaphore.h                                                           */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,8 +28,48 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#define Thread CTRThread
-#include <3ds.h>
-#undef Thread
-#define PLATFORM_THREAD_OVERRIDE
-#define STACKSIZE (4 * 1024)
+#ifndef SEMAPHORE_H
+#define SEMAPHORE_H
+
+#include "core/error/error_list.h"
+#include "core/typedefs.h"
+#include "3ds_mutex.h"
+
+class Semaphore {
+private:
+	mutable std::mutex mutex;
+	mutable std::condition_variable condition;
+	mutable uint32_t count = 0; // Initialized as locked.
+
+public:
+	inline void post() const {
+		mutex.lock();
+		count++;
+		condition.notify_one();
+        mutex.unlock();
+	}
+
+	inline void wait() const {
+        mutex.lock();
+		while (!count) { // Handle spurious wake-ups.
+			condition.wait(mutex);
+		}
+        mutex.unlock();
+		count--;
+	}
+
+	inline bool try_wait() const {
+		mutex.lock();
+        bool value = false;
+		if (count) {
+			count--;
+            value = true;
+		} else {
+			value = false;
+		}
+        mutex.unlock();
+        return value;
+	}
+};
+
+#endif // SEMAPHORE_H
