@@ -6,4 +6,4 @@ files = [
     "platform_thread.cpp"
 ]
 
-prog = env.add_program("#bin/godot", files)
+prog = env.add_program("#bin/godot.3ds.elf", files)

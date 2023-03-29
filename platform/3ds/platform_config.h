@@ -27,9 +27,11 @@
 /* TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE      */
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
-
+#ifndef PLATFORM_CONFIG_H
+#define PLATFORM_CONFIG_H
 #define Thread CTRThread
 #include <3ds.h>
 #undef Thread
 #define PLATFORM_THREAD_OVERRIDE
 #define STACKSIZE (4 * 1024)
+#endif

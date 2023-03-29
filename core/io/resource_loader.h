@@ -67,7 +67,6 @@ protected:
 	GDVIRTUAL1RC(Vector<String>, _get_classes_used, String)
 	GDVIRTUAL2RC(Error, _rename_dependencies, String, Dictionary)
 	GDVIRTUAL1RC(bool, _exists, String)
-
 	GDVIRTUAL4RC(Variant, _load, String, String, bool, int)
 
 public:
