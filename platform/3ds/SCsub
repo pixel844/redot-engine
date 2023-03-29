@@ -1,9 +1,14 @@
 Import("env")
+from platform_methods import run_in_subprocess
+import platform_3ds_builders
 
 files = [
     "godot_3ds.cpp",
     "os_3ds.cpp",
-    "platform_thread.cpp"
+    "platform_thread.cpp",
+    "renderer/CitroRenderer.cpp",
+    "filesystem/dir_access_3ds.cpp",
+    "filesystem/file_access_3ds.cpp"
 ]
-
-prog = env.add_program("#bin/godot.3ds.elf", files)
+prog = env.add_program("#bin/godot", files)
+env.AddPostAction(prog, run_in_subprocess(platform_3ds_builders.make_debug_3ds))

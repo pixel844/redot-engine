@@ -1,12 +1,13 @@
 #ifndef OS_3DS_H
 #define OS_3DS_H
 #include <core/os/os.h>
+#include <core/input/input.h>
 
 class OS_3DS : public OS {
-    private:
-        MainLoop *main_loop = nullptr;
-        
+    public:
+        void run();
         void initialize() override;
+        void initialize_core();
 	    void initialize_joypads() override;
 
         void set_main_loop(MainLoop *p_main_loop) override;
@@ -38,11 +39,16 @@ class OS_3DS : public OS {
         String get_distribution_name() const override;
         String get_version() const override;
 
-        DateTime get_datetime(bool utc = false) const override;
+        DateTime get_datetime(bool p_utc = false) const override;
         TimeZoneInfo get_time_zone_info() const override;
 
         void delay_usec(uint32_t p_usec) const override;
         uint64_t get_ticks_usec() const override;
+
+    private:
+        MainLoop *main_loop = nullptr;
+        SwkbdState *keyboard_state = nullptr;
+        uint64_t ticks_start = 0;
 
 };
 #endif
