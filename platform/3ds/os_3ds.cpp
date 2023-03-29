@@ -2,7 +2,7 @@
 #include "os_3ds.h"
 
 void OS_3DS::initialize() {
-
+    main_loop = nullptr;
 }
 
 void OS_3DS::initialize_joypads() {

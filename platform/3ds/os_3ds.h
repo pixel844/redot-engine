@@ -3,7 +3,9 @@
 #include <core/os/os.h>
 
 class OS_3DS : public OS {
-    protected:
+    private:
+        MainLoop *main_loop = nullptr;
+        
         void initialize() override;
 	    void initialize_joypads() override;
 
