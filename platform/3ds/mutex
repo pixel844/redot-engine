@@ -136,12 +136,11 @@ class condition_variable
 
 class RWLock {
 	mutable std::mutex rw_mutex;
-    std::condition_variable rw_cv;
+    mutable std::condition_variable rw_cv;
     mutable uintmax_t readers = {0}, writers = {0};
-    std::atomic<int> refcount{0};
 public:
 	// Lock the RWLock, block if locked by someone else.
-	inline void read_lock() {
+	inline void read_lock() const {
 	 std::unique_lock<std::mutex> lk(rw_mutex);
     if (writers != 0) {
       rw_cv.wait(lk);
@@ -150,7 +149,7 @@ public:
 	}
 
 	// Unlock the RWLock, let other threads continue.
-	inline void read_unlock() {
+	inline void read_unlock() const {
 		std::lock_guard<std::mutex> lk(rw_mutex);
     if (readers == 1) {  // I am the last one.
       rw_cv.notify_all();
@@ -159,7 +158,7 @@ public:
 	}
 
 	// Attempt to lock the RWLock for reading. True on success, false means it can't lock.
-	inline bool read_try_lock() {
+	inline bool read_try_lock() const {
 	bool succeeded = rw_mutex.try_lock();
     if (writers != 0) {
       rw_cv.wait(&rw_mutex);
@@ -201,10 +200,6 @@ class RWLockRead {
 	const RWLock &lock;
 
 public:
-	inline RWLockRead(RWLock &p_lock) :
-			lock(p_lock) {
-		lock.read_lock();
-	}
     inline RWLockRead(const RWLock &p_lock) :
 			lock(p_lock) {
 		lock.read_lock();

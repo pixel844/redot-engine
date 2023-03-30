@@ -49,6 +49,11 @@ def get_flags():
 		('target','template_debug'),
 		("module_glslang_enabled",False),
 		('module_dds_enabled',False),
+		('module_gltf_enabled',False),
+		('module_csg_enabled', False),
+		('module_gridmap_enabled',False),
+		('module_freetype_enabled',False),
+		('module_ogg_enabled',False),
 		('module_tga_enabled',False),
 		('module_denoise_enabled',False),
 		('module_jsonrpg_enabled',False),
@@ -114,14 +119,14 @@ def configure_misc(env):
 	if env["PLATFORM"] == "win32":
 		env.use_windows_spawn_fix()
 	env.Append(CPPPATH=['#platform/3ds'])
-	env.Append(CCFLAGS=['-Wall','-mword-relocations','-ffunction-sections', '-fno-exceptions','-fpermissive'])
+	env.Append(CCFLAGS=['-Wall','-mword-relocations','-ffunction-sections', '-fdata-sections', '-fno-exceptions','-Wl,-dead_strip'])
 	env.Append(CCFLAGS=['-D__3DS__', '-DLIBC_FILEIO_ENABLED','-DNO_SAFE_CAST','-DNEED_LONG_INT','-D_XOPEN_SOURCE=500','-DRW_LOCK_H'])
 	env.Append(CCFLAGS=['-U__INT32_TYPE__','-U__UINT32_TYPE__','-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int','-DUNIX_SOCKET_UNAVAILABLE','-DPAD_ALIGN=16'])
 	env.Append(CPPPATH=[dkp_path +"/portlibs/3ds/include",dkp_path +"/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
 	env.Append(LIBPATH=[dkp_path+"/portlibs/armv6k/lib", dkp_path +
                "/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])
-	env.Append(LINKFLAGS=['-specs=3dsx.specs','-march=armv6k','-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard'])
-	env.Append(LIBS=['citro3d','ctru','png'])
+	env.Append(LINKFLAGS=["-Wl,-S", "-Wl,-x",'-specs=3dsx.specs','-march=armv6k','-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard','-Wl,--gc-sections'])
+	env.Append(LIBS=['ctru','png'])
 
 def configure(env):
 	configure_arch(env)
