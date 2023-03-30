@@ -20,11 +20,11 @@ void OS_3DS::initialize_core() {
     gfxInitDefault();
     consoleInit(GFX_BOTTOM,NULL);
     osSetSpeedupEnable(true);
+    psInit();
     archiveMountSdmc();
     romfsInit();
     chdir("sdmc:/");
     aptHook(&apt_hook_cookie, apt_hook_callback, this);
-    APT_SetAppCpuTimeLimit(30);
     FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_USERDATA);
 	FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_FILESYSTEM);
@@ -32,7 +32,15 @@ void OS_3DS::initialize_core() {
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_FILESYSTEM);
 }   
+void OS_3DS::finalize() {
+    psExit();
+    romfsExit();
+    archiveUnmountAll();
+}
 
+void OS_3DS::finalize_core() {
+
+}
 void OS_3DS::initialize() {
     main_loop = nullptr;
     initialize_core();
@@ -85,13 +93,7 @@ void OS_3DS::delete_main_loop() {
     main_loop = nullptr;
 }
 
-void OS_3DS::finalize() {
 
-}
-
-void OS_3DS::finalize_core() {
-
-}
 
 bool OS_3DS::_check_internal_feature_support(const String &p_feature) {
     return false;
