@@ -2,14 +2,19 @@
 #define OS_3DS_H
 #include <core/os/os.h>
 #include <core/input/input.h>
-
+#include <unistd.h>
 class OS_3DS : public OS {
     public:
         void run();
         void initialize() override;
         void initialize_core();
 	    void initialize_joypads() override;
-
+        Error set_cwd(const String &p_cwd) override {
+            if (chdir(p_cwd.utf8().get_data()) != 0) {
+		        return ERR_CANT_OPEN;
+	        }
+            return OK;
+        };
         void set_main_loop(MainLoop *p_main_loop) override;
         MainLoop *get_main_loop() const override;
         void delete_main_loop() override;

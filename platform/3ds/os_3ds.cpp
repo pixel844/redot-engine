@@ -17,11 +17,12 @@ static void apt_hook_callback(APT_HookType hook, void* param)
 
 void OS_3DS::initialize_core() {
     ticks_start = svcGetSystemTick();
-
     gfxInitDefault();
     consoleInit(GFX_BOTTOM,NULL);
     osSetSpeedupEnable(true);
     archiveMountSdmc();
+    romfsInit();
+    chdir("sdmc:/");
     aptHook(&apt_hook_cookie, apt_hook_callback, this);
     APT_SetAppCpuTimeLimit(30);
     FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_RESOURCES);
@@ -52,9 +53,12 @@ void OS_3DS::run() {
     while (aptMainLoop())
     {
         DisplayServer::get_singleton()->process_events();
-		
+		hidScanInput();
 		if (hidKeysDown() & KEY_SELECT)
-			break;
+        {
+            printf("The select key has been pressed\n");
+            break;
+        }
 
         if (Main::iteration())
         {

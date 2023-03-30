@@ -26,14 +26,22 @@ def can_build():
 def get_opts():
 	from SCons.Variables import BoolVariable
 	return [
-		BoolVariable("use_ubsan", "Use LLVM/GCC compiler undefined behavior sanitizer (UBSAN)", True),
-        BoolVariable("use_asan", "Use LLVM/GCC compiler address sanitizer (ASAN)", True),
-        BoolVariable("use_lsan", "Use LLVM/GCC compiler leak sanitizer (LSAN)", True),
-        BoolVariable("use_tsan", "Use LLVM/GCC compiler thread sanitizer (TSAN)", True)
+		BoolVariable("disable_advanced_gui","",True),
+		BoolVariable("openxr","",False),
+		BoolVariable(
+            "dlink_enabled", "Enable WebAssembly dynamic linking (GDExtension support). Produces bigger binaries", False
+        ),
+		BoolVariable("use_assertions", "Use Emscripten runtime assertions", False),
+        BoolVariable("use_ubsan", "Use Emscripten undefined behavior sanitizer (UBSAN)", False),
+        BoolVariable("use_asan", "Use Emscripten address sanitizer (ASAN)", False),
+        BoolVariable("use_lsan", "Use Emscripten leak sanitizer (LSAN)", False),
+        BoolVariable("use_safe_heap", "Use Emscripten SAFE_HEAP sanitizer", False),
 	]
 
 def get_flags():
 	return [
+		("optimize", "size"),
+		
 		("arch", "arm32"),
 		('tools', False),
 		('editor',False),
@@ -41,11 +49,19 @@ def get_flags():
 		('target','template_release'),
 		("module_glslang_enabled",False),
 		('module_svg_enabled',False),
+		('module_mono_enabled',False),
 		('module_upnp_enabled',False),
+		('module_mobile_vr_enabled',False),
+		('module_multiplayer_enabled',False),
+		('module_websocket_enabled',False),
+		('module_webxr_enabled',False),
+		('module_hdr_enabled',False),
 		('module_mbedtls_enabled',False),
 		('module_vhacd_enabled',False),
 		('module_astcenc_enabled', False),
 		('module_basis_universal_enabled', False),
+		('module_msdfgen_enabled',False),
+		('module_minimp3d_enabled',False),
 		('module_tinyexr_enabled',False),
 		('module_zip_enabled',False),
 		('module_xatlas_unwrap_enabled',False),
@@ -84,7 +100,7 @@ def configure_misc(env):
 	env.Append(CPPPATH=['#platform/3ds'])
 	env.Append(CCFLAGS=['-Wall','-mword-relocations','-ffunction-sections', '-fno-exceptions', '-std=gnu++17'])
 	env.Append(CCFLAGS=['-D__3DS__', '-DLIBC_FILEIO_ENABLED','-DNO_SAFE_CAST','-DNEED_LONG_INT','-D_XOPEN_SOURCE=500'])
-	env.Append(CCFLAGS=['-U__INT32_TYPE__','-U__UINT32_TYPE__','-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int','-DUNIX_SOCKET_UNAVAILABLE'])
+	env.Append(CCFLAGS=['-U__INT32_TYPE__','-U__UINT32_TYPE__','-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int','-DUNIX_SOCKET_UNAVAILABLE','-DPAD_ALIGN=16'])
 	env.Append(CPPPATH=[dkp_path +"/portlibs/3ds/include",dkp_path +"/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
 	env.Append(LIBPATH=[dkp_path+"/portlibs/armv6k/lib", dkp_path +
                "/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])

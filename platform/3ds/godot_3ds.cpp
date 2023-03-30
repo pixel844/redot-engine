@@ -11,13 +11,10 @@ int main(int argc, char *argv[])
     OS_3DS os;
 	setlocale(LC_CTYPE,"");
     TEST_MAIN_OVERRIDE;
-    char cwd[] = "sdmc:/";
-	ERR_FAIL_COND_V(!cwd, ERR_OUT_OF_MEMORY);
 	//char *ret = getcwd(cwd, PATH_MAX);
-	Error err = Main::setup("sdmc:/godot.3ds.elf",0, 0);
+	Error err = Main::setup("sdmc:/godot.3dsx",0, NULL);
 	if (err != OK) {
 		printf("The error of setup was %i\n", err);
-		free(cwd);
 
 		if (err == ERR_HELP) { // Returned by --help and --version, so success.
 			return 0;
