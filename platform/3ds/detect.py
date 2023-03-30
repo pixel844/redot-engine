@@ -45,9 +45,24 @@ def get_flags():
 		("arch", "arm32"),
 		('tools', False),
 		('editor',False),
-		('debug_symbols',True),
-		('target','template_release'),
+		('debug_symbols',False),
+		('target','template_debug'),
 		("module_glslang_enabled",False),
+		('module_dds_enabled',False),
+		('module_tga_enabled',False),
+		('module_denoise_enabled',False),
+		('module_jsonrpg_enabled',False),
+		('module_minimp3_enabled',False),
+		('module_raycast_enabled',False),
+		('module_noise_enabled',False),
+		('module_squish_enabled',False),
+		('module_vorbis_enabled',False),
+		('module_webp_enabled',False),
+		('module_camera_enabled',False),
+		('module_bmp_enabled',False),
+		('module_lightmapper_rd_enabled',False),
+		('module_text_server_adv_enabled',False),
+		('module_text_server_fb_enabled',True),
 		('module_svg_enabled',False),
 		('module_mono_enabled',False),
 		('module_upnp_enabled',False),
@@ -68,6 +83,7 @@ def get_flags():
 		("builtin_pcre2_with_jit", False),
 		('builtin_mbedtls', False),
 		('builtin_miniupnpc',False),
+		('builtin_libpng',False),
 		('vulkan',False),
 		('gles3', False)
 	]
@@ -98,14 +114,14 @@ def configure_misc(env):
 	if env["PLATFORM"] == "win32":
 		env.use_windows_spawn_fix()
 	env.Append(CPPPATH=['#platform/3ds'])
-	env.Append(CCFLAGS=['-Wall','-mword-relocations','-ffunction-sections', '-fno-exceptions', '-std=gnu++17'])
-	env.Append(CCFLAGS=['-D__3DS__', '-DLIBC_FILEIO_ENABLED','-DNO_SAFE_CAST','-DNEED_LONG_INT','-D_XOPEN_SOURCE=500'])
+	env.Append(CCFLAGS=['-Wall','-mword-relocations','-ffunction-sections', '-fno-exceptions','-fpermissive'])
+	env.Append(CCFLAGS=['-D__3DS__', '-DLIBC_FILEIO_ENABLED','-DNO_SAFE_CAST','-DNEED_LONG_INT','-D_XOPEN_SOURCE=500','-DRW_LOCK_H'])
 	env.Append(CCFLAGS=['-U__INT32_TYPE__','-U__UINT32_TYPE__','-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int','-DUNIX_SOCKET_UNAVAILABLE','-DPAD_ALIGN=16'])
 	env.Append(CPPPATH=[dkp_path +"/portlibs/3ds/include",dkp_path +"/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
 	env.Append(LIBPATH=[dkp_path+"/portlibs/armv6k/lib", dkp_path +
                "/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])
 	env.Append(LINKFLAGS=['-specs=3dsx.specs','-march=armv6k','-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard'])
-	env.Append(LIBS=['citro3d','ctru','bz2','png','z'])
+	env.Append(LIBS=['citro3d','ctru','png'])
 
 def configure(env):
 	configure_arch(env)

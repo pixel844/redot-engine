@@ -4,6 +4,7 @@
 #include <3ds.h>
 #undef Thread
 #include <atomic>
+#include <functional>
 namespace std {
 class condition_variable;
 class mutex {
@@ -113,6 +114,11 @@ class condition_variable
     void wait(mutex &__lock)
     {
         CondVar_Wait(&condition_variable,&__lock._lock);
+    }
+    void wait(mutex &__lock,std::function<void()> lambda)
+    {
+        wait(__lock);
+        lambda();
     }
     void notify_one()
     {

@@ -29,7 +29,6 @@
 /**************************************************************************/
 
 #include "memory.h"
-
 #include "core/error/error_macros.h"
 #include "core/templates/safe_refcount.h"
 

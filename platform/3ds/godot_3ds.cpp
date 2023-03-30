@@ -4,7 +4,6 @@
 #include "os_3ds.h"
 #include "renderer/CitroRenderer.h"
 #include <sys/resource.h>
-
 int main(int argc, char *argv[])
 {
 	// Note: Set stack size to be at least 30 MB (vs 8 MB default) to avoid overflow, address sanitizer can increase stack usage up to 3 times.
