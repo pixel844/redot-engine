@@ -14,9 +14,7 @@ void OS_3DS::initialize_core() {
 
     gfxInitDefault();
     consoleInit(GFX_BOTTOM,NULL);
-    gfxSetDoubleBuffering(GFX_TOP,true);
-    APT_SetAppCpuTimeLimit(30);
-
+    osSetSpeedupEnable(true);
     archiveMountSdmc();
 
     FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_RESOURCES);
