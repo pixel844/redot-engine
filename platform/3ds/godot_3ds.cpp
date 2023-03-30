@@ -1,6 +1,3 @@
-#define __UINT32_TYPE__ unsigned int
-#define __INT32_TYPE__ int
-#define lock_guard base_lock_guard
 #include "platform_config.h"
 #include <unistd.h>
 #include "main/main.h"
@@ -28,19 +25,12 @@ int main(int argc, char *argv[])
 		return 255;
 	}
 	if (Main::start()) {
-		consoleClear();
 		os.set_exit_code(EXIT_SUCCESS);
 		os.run();
 	}
 	Main::cleanup();
-	/*if (ret)
-	{
-		if (chdir(cwd) != 0) {
-			ERR_PRINT("Couldn't return to previous working directory.");
-		}
-	}*/
-	//free(cwd);
     printf("%d",os.get_exit_code());
+	return os.get_exit_code();
 }
 
 extern "C" {

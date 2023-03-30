@@ -84,7 +84,7 @@ def configure_misc(env):
 	env.Append(CPPPATH=['#platform/3ds'])
 	env.Append(CCFLAGS=['-Wall','-mword-relocations','-ffunction-sections', '-fno-exceptions', '-std=gnu++17'])
 	env.Append(CCFLAGS=['-D__3DS__', '-DLIBC_FILEIO_ENABLED','-DNO_SAFE_CAST','-DNEED_LONG_INT','-D_XOPEN_SOURCE=500'])
-	env.Append(CCFLAGS=['-U__INT32_TYPE__','-U__UINT32_TYPE__','-U__INT64_TYPE__','-U__UINT64_TYPE__','-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int','-D__UINT64_TYPE__=long unsigned int','-DUNIX_SOCKET_UNAVAILABLE'])
+	env.Append(CCFLAGS=['-U__INT32_TYPE__','-U__UINT32_TYPE__','-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int','-DUNIX_SOCKET_UNAVAILABLE'])
 	env.Append(CPPPATH=[dkp_path +"/portlibs/3ds/include",dkp_path +"/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
 	env.Append(LIBPATH=[dkp_path+"/portlibs/armv6k/lib", dkp_path +
                "/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])

@@ -9,8 +9,7 @@ from platform_methods import subprocess_main
 
 def make_debug_3ds(target, source, env):
     print("3ds debug build setup")
-    os.system("arm-none-eabi-objcopy --only-keep-debug {0} {0}.debugsymbols".format(target[0]))
-    os.system("arm-none-eabi-strip --strip-debug --strip-unneeded {0}".format(target[0]))
+    os.system("3dsxtool {0} {0}.3dsx".format(target[0]))
 
 
 if __name__ == "__main__":

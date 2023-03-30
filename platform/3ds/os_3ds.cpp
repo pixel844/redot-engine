@@ -6,8 +6,14 @@
 #include "filesystem/dir_access_3ds.h"
 #include "renderer/CitroRenderer.h"
 #include "servers/display_server.h"
-#include "tests/display_server_mock.h"
 #include <time.h>
+static aptHookCookie apt_hook_cookie;
+static void apt_hook_callback(APT_HookType hook, void* param)
+{
+	if (hook == APTHOOK_ONRESTORE || hook == APTHOOK_ONWAKEUP) {
+		
+	}
+}
 
 void OS_3DS::initialize_core() {
     ticks_start = svcGetSystemTick();
@@ -16,14 +22,14 @@ void OS_3DS::initialize_core() {
     consoleInit(GFX_BOTTOM,NULL);
     osSetSpeedupEnable(true);
     archiveMountSdmc();
-
+    aptHook(&apt_hook_cookie, apt_hook_callback, this);
+    APT_SetAppCpuTimeLimit(30);
     FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_USERDATA);
 	FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_FILESYSTEM);
     DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_FILESYSTEM);
-    DisplayServerMock::register_mock_driver();
 }   
 
 void OS_3DS::initialize() {
@@ -43,9 +49,13 @@ void OS_3DS::run() {
     }
     main_loop->initialize();
 
-    while (true)
+    while (aptMainLoop())
     {
         DisplayServer::get_singleton()->process_events();
+		
+		if (hidKeysDown() & KEY_SELECT)
+			break;
+
         if (Main::iteration())
         {
             break;
@@ -146,7 +156,11 @@ String OS_3DS::get_distribution_name() const {
 
 String OS_3DS::get_version() const {
     char buffer[256];
-    osGetSystemVersionDataString(NULL,NULL,buffer,256);
+    Result res = osGetSystemVersionDataString(NULL,NULL,buffer,256);
+    if (R_FAILED(res))
+    {
+        return "";
+    }
     return buffer;
 }
 
@@ -198,13 +212,12 @@ OS::TimeZoneInfo OS_3DS::get_time_zone_info() const {
 	return ret;
 }
 
-
-
 void OS_3DS::delay_usec(uint32_t p_usec) const {
     svcSleepThread(1000ULL * p_usec);
 }
 #define TICKS_PER_SEC 268123480ULL
 #define TICKS_PER_USEC 268
 uint64_t OS_3DS::get_ticks_usec() const{
-   return (svcGetSystemTick() - ticks_start) / TICKS_PER_USEC;
+   uint64_t ticks =  (svcGetSystemTick() - ticks_start) / TICKS_PER_USEC;
+   return ticks;
 }
