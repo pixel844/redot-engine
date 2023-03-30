@@ -59,7 +59,6 @@ def get_flags():
 
 def configure_arch(env):
 		env.Append(CCFLAGS=['-march=armv6k','-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard'])
-		env.extra_suffix += '.arm32v6k'
 
 def configure_cross(env):
 	dkp_path = os.getenv("DEVKITPRO")
