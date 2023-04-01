@@ -35,7 +35,7 @@
 #include "servers/rendering/renderer_scene_render.h"
 #include "storage/utilities.h"
 
-class RasterizerSceneCITRO3D : public RendererSceneRender {
+class RasterizerSceneCitro3D : public RendererSceneRender {
 public:
 	class GeometryInstanceCITRO3D : public RenderGeometryInstance {
 	public:
@@ -77,7 +77,7 @@ public:
 
 public:
 	RenderGeometryInstance *geometry_instance_create(RID p_base) override {
-		RS::InstanceType type = RendererCITRO3D::Utilities::get_singleton()->get_base_type(p_base);
+		RS::InstanceType type = RendererCitro3D::Utilities::get_singleton()->get_base_type(p_base);
 		ERR_FAIL_COND_V(!((1 << type) & RS::INSTANCE_GEOMETRY_MASK), nullptr);
 
 		GeometryInstanceCITRO3D *ginstance = geometry_instance_alloc.alloc();
@@ -181,8 +181,8 @@ public:
 	virtual void decals_set_filter(RS::DecalFilter p_filter) override {}
 	virtual void light_projectors_set_filter(RS::LightProjectorFilter p_filter) override {}
 
-	RasterizerSceneCITRO3D() {}
-	~RasterizerSceneCITRO3D() {}
+	RasterizerSceneCitro3D() {}
+	~RasterizerSceneCitro3D() {}
 };
 
 #endif // RASTERIZER_SCENE_CITRO3D_H

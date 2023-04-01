@@ -46,24 +46,32 @@
 #include "storage/utilities.h"
 #include "servers/rendering/renderer_compositor.h"
 #include "servers/rendering_server.h"
+#include <citro3d.h>
 
-class RasterizerCITRO3D : public RendererCompositor {
+class RasterizerCitro3D : public RendererCompositor {
 private:
 	uint64_t frame = 1;
 	double delta = 0;
 	double time = 0.0;
+	C3D_RenderTarget *target_top_left;
+	C3D_RenderTarget *target_top_right;
+	C3D_RenderTarget *target_bottom;
+	DVLB_s *vshader_dvlb;
+	shaderProgram_s program;
+	int uLoc_projection;
+	C3D_Mtx projection;
 
 protected:
-	RasterizerCanvasCITRO3D canvas;
-	RendererCITRO3D::Utilities utilities;
-	RendererCITRO3D::LightStorage light_storage;
-	RendererCITRO3D::MaterialStorage material_storage;
-	RendererCITRO3D::MeshStorage mesh_storage;
-	RendererCITRO3D::ParticlesStorage particles_storage;
-	RendererCITRO3D::TextureStorage texture_storage;
-	RendererCITRO3D::GI gi;
-	RendererCITRO3D::Fog fog;
-	RasterizerSceneCITRO3D scene;
+	RasterizerCanvasCitro3D canvas;
+	RendererCitro3D::Utilities utilities;
+	RendererCitro3D::LightStorage light_storage;
+	RendererCitro3D::MaterialStorage material_storage;
+	RendererCitro3D::MeshStorage mesh_storage;
+	RendererCitro3D::ParticlesStorage particles_storage;
+	RendererCitro3D::TextureStorage texture_storage;
+	RendererCitro3D::GI gi;
+	RendererCitro3D::Fog fog;
+	RasterizerSceneCitro3D scene;
 
 public:
 	RendererUtilities *get_utilities() override { return &utilities; };
@@ -79,29 +87,20 @@ public:
 
 	void set_boot_image(const Ref<Image> &p_image, const Color &p_color, bool p_scale, bool p_use_filter = true) override {}
 
-	void initialize() override {
-		print_line("Citro3D initialized");
-	}
-	void begin_frame(double frame_step) override {
-		frame++;
-		delta = frame_step;
-		time += frame_step;
-	}
+	void initialize() override;
+	void begin_frame(double frame_step) override;
+
+	void shader_init();
 
 	void prepare_for_blitting_render_targets() override {}
 	void blit_render_targets_to_screen(int p_screen, const BlitToScreen *p_render_targets, int p_amount) override {}
 
-	void end_frame(bool p_swap_buffers) override {
-		if (p_swap_buffers) {
-			DisplayServer::get_singleton()->swap_buffers();
-		}
-	}
+	void end_frame(bool p_swap_buffers) override;
 
-	void finalize() override {
-	}
+	void finalize() override;
 
 	static RendererCompositor *_create_current() {
-		return memnew(RasterizerCITRO3D);
+		return memnew(RasterizerCitro3D);
 	}
 
 	static void make_current() {
@@ -113,8 +112,8 @@ public:
 	double get_frame_delta_time() const override { return delta; }
 	double get_total_time() const override { return time; }
 
-	RasterizerCITRO3D() {}
-	~RasterizerCITRO3D() {}
+	RasterizerCitro3D();
+	~RasterizerCitro3D() {}
 };
 
 #endif // RASTERIZER_CITRO3D_H

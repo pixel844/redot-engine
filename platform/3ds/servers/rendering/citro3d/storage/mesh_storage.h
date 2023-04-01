@@ -35,7 +35,7 @@
 #include "core/templates/rid_owner.h"
 #include "servers/rendering/storage/mesh_storage.h"
 
-namespace RendererCITRO3D {
+namespace RendererCitro3D {
 
 class MeshStorage : public RendererMeshStorage {
 private:
@@ -177,6 +177,6 @@ public:
 	void occluder_set_mesh(RID p_occluder, const PackedVector3Array &p_vertices, const PackedInt32Array &p_indices) {}
 };
 
-} // namespace RendererCITRO3D
+} // namespace RendererCitro3D
 
 #endif // MESH_STORAGE_CITRO3D_H

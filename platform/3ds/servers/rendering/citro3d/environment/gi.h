@@ -33,7 +33,7 @@
 
 #include "servers/rendering/environment/renderer_gi.h"
 
-namespace RendererCITRO3D {
+namespace RendererCitro3D {
 
 class GI : public RendererGI {
 public:
@@ -80,6 +80,6 @@ public:
 	virtual uint32_t voxel_gi_get_version(RID p_voxel_gi) const override { return 0; }
 };
 
-} // namespace RendererCITRO3D
+} // namespace RendererCitro3D
 
 #endif // GI_CITRO3D_H

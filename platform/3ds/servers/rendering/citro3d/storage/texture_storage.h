@@ -34,7 +34,7 @@
 #include "servers/rendering/rendering_server_globals.h"
 #include "servers/rendering/storage/texture_storage.h"
 
-namespace RendererCITRO3D {
+namespace RendererCitro3D {
 
 class TextureStorage : public RendererTextureStorage {
 private:

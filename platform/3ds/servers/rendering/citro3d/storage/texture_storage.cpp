@@ -30,7 +30,7 @@
 
 #include "texture_storage.h"
 
-using namespace RendererCITRO3D;
+using namespace RendererCitro3D;
 
 TextureStorage *TextureStorage::singleton = nullptr;
 

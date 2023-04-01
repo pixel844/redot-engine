@@ -33,7 +33,7 @@
 
 #include "servers/rendering/storage/light_storage.h"
 
-namespace RendererCITRO3D {
+namespace RendererCitro3D {
 
 class LightStorage : public RendererLightStorage {
 public:
@@ -180,6 +180,6 @@ public:
 	virtual void set_directional_shadow_count(int p_count) override {}
 };
 
-} // namespace RendererCITRO3D
+} // namespace RendererCitro3D
 
 #endif // LIGHT_STORAGE_CITRO3D_H

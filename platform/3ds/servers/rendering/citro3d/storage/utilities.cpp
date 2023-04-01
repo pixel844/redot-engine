@@ -30,7 +30,7 @@
 
 #include "utilities.h"
 
-using namespace RendererCITRO3D;
+using namespace RendererCitro3D;
 
 Utilities *Utilities::singleton = nullptr;
 

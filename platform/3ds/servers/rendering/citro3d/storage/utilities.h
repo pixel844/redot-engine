@@ -35,7 +35,7 @@
 #include "servers/rendering/storage/utilities.h"
 #include "texture_storage.h"
 
-namespace RendererCITRO3D {
+namespace RendererCitro3D {
 
 class Utilities : public RendererUtilities {
 private:
@@ -50,18 +50,18 @@ public:
 	/* INSTANCES */
 
 	virtual RS::InstanceType get_base_type(RID p_rid) const override {
-		if (RendererCITRO3D::MeshStorage::get_singleton()->owns_mesh(p_rid)) {
+		if (RendererCitro3D::MeshStorage::get_singleton()->owns_mesh(p_rid)) {
 			return RS::INSTANCE_MESH;
 		}
 		return RS::INSTANCE_NONE;
 	}
 
 	virtual bool free(RID p_rid) override {
-		if (RendererCITRO3D::TextureStorage::get_singleton()->owns_texture(p_rid)) {
-			RendererCITRO3D::TextureStorage::get_singleton()->texture_free(p_rid);
+		if (RendererCitro3D::TextureStorage::get_singleton()->owns_texture(p_rid)) {
+			RendererCitro3D::TextureStorage::get_singleton()->texture_free(p_rid);
 			return true;
-		} else if (RendererCITRO3D::MeshStorage::get_singleton()->owns_mesh(p_rid)) {
-			RendererCITRO3D::MeshStorage::get_singleton()->mesh_free(p_rid);
+		} else if (RendererCitro3D::MeshStorage::get_singleton()->owns_mesh(p_rid)) {
+			RendererCitro3D::MeshStorage::get_singleton()->mesh_free(p_rid);
 			return true;
 		}
 		return false;

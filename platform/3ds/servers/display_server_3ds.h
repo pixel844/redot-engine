@@ -33,9 +33,9 @@
 
 #include "servers/display_server.h"
 
-#include "rasterizer_citro3d.h"
+#include "rendering/citro3d/rasterizer_citro3d.h"
 
-class DisplayServerCITRO3D : public DisplayServer {
+class DisplayServer3DS : public DisplayServer {
 private:
 	friend class DisplayServer;
 
@@ -47,17 +47,15 @@ private:
 
 	static DisplayServer *create_func(const String &p_rendering_driver, DisplayServer::WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Error &r_error) {
 		r_error = OK;
-		RasterizerCITRO3D::make_current();
-		return memnew(DisplayServerCITRO3D());
+		RasterizerCitro3D::make_current();
+		return memnew(DisplayServer3DS());
 	}
 
 public:
-	bool has_feature(Feature p_feature) const override { 
-		return false;
-	}
+	bool has_feature(Feature p_feature) const override;
 	String get_name() const override { return "CITRO3D"; }
 
-	int get_screen_count() const override { return 2; }
+	int get_screen_count() const override { return 1; }
 	int get_primary_screen() const override { return 0; };
 	Point2i screen_get_position(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return Point2i(); }
 	Size2i screen_get_size(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return Size2i(); }
@@ -65,7 +63,7 @@ public:
 	int screen_get_dpi(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return 96; /* 0 might cause issues */ }
 	float screen_get_scale(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return 1; }
 	float screen_get_max_scale() const override { return 1; }
-	float screen_get_refresh_rate(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return SCREEN_REFRESH_RATE_FALLBACK; }
+	float screen_get_refresh_rate(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return 60; }
 
 	Vector<DisplayServer::WindowID> get_window_list() const override { return Vector<DisplayServer::WindowID>(); }
 
@@ -108,7 +106,7 @@ public:
 	Size2i window_get_size(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(); }
 	Size2i window_get_size_with_decorations(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(); }
 
-	void window_set_mode(WindowMode p_mode, WindowID p_window = MAIN_WINDOW_ID) override {print_line("call to window set mode");}
+	void window_set_mode(WindowMode p_mode, WindowID p_window = MAIN_WINDOW_ID) override {}
 	WindowMode window_get_mode(WindowID p_window = MAIN_WINDOW_ID) const override { return WINDOW_MODE_MINIMIZED; }
 
 	void window_set_vsync_mode(VSyncMode p_vsync_mode, WindowID p_window = MAIN_WINDOW_ID) override {}
@@ -131,19 +129,21 @@ public:
 
 	static void register_citro3d_driver() {
 		register_create_function("CITRO3D", create_func, get_rendering_drivers_func);
-		print_line("Registered CITRO3D display server");
+		//print_line("Registered CITRO3D display server");
 	}
 
-	bool get_swap_cancel_ok() override{}
-	void swap_buffers() override {
-	}
+	bool get_swap_cancel_ok() override{return true;}
+	void swap_buffers() override;
 
-	void process_events() override {}
+	void process_events() override;
 
 	void set_icon(const Ref<Image> &p_icon) override {}
 
-	DisplayServerCITRO3D() {}
-	~DisplayServerCITRO3D() {}
+	DisplayServer3DS();
+	~DisplayServer3DS();
+	private:
+		SwkbdState keyboard_state;
+		SwkbdStatusData keyboard_status;
 };
 
 #endif // DISPLAY_SERVER_CITRO3D_H

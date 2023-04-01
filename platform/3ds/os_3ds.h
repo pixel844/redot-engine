@@ -11,7 +11,6 @@ class OS_3DS : public OS {
         void initialize() override;
         void initialize_core();
 	    void initialize_joypads() override;
-        void setup();
         Error set_cwd(const String &p_cwd) override {
             if (chdir(p_cwd.utf8().get_data()) != 0) {
 		        return ERR_CANT_OPEN;

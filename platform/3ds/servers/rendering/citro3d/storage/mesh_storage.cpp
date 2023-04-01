@@ -30,7 +30,7 @@
 
 #include "mesh_storage.h"
 
-using namespace RendererCITRO3D;
+using namespace RendererCitro3D;
 
 MeshStorage *MeshStorage::singleton = nullptr;
 

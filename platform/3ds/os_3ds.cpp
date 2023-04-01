@@ -2,7 +2,7 @@
 #include "os_3ds.h"
 #include <main/main.h>
 #include "servers/display_server.h"
-#include "servers/rendering/citro3d/display_server_citro3d.h"
+#include "servers/display_server_3ds.h"
 #include "servers/rendering_server.h"
 #include "filesystem/file_access_3ds.h"
 #include "filesystem/dir_access_3ds.h"
@@ -18,14 +18,13 @@ static void apt_hook_callback(APT_HookType hook, void* param)
 }
 
 OS_3DS::OS_3DS(){
-    gfxInitDefault();
-    consoleInit(GFX_BOTTOM,NULL);
     osSetSpeedupEnable(true);
     psInit();
     archiveMountSdmc();
     romfsInit();
     aptHook(&apt_hook_cookie, apt_hook_callback, this);
 }
+
 void OS_3DS::initialize_core() {
     ticks_start = svcGetSystemTick();
     FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_RESOURCES);
@@ -34,8 +33,9 @@ void OS_3DS::initialize_core() {
     DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_FILESYSTEM);
-    DisplayServerCITRO3D::register_citro3d_driver();
+    DisplayServer3DS::register_citro3d_driver();
 }   
+
 void OS_3DS::finalize() {
     psExit();
     romfsExit();
@@ -57,22 +57,17 @@ void OS_3DS::initialize_joypads() {
 }
 
 void OS_3DS::run() {
+
     if (!main_loop)
     {
         return;
     }
+
     main_loop->initialize();
 
-    while (aptMainLoop())
+    while (true)
     {
         DisplayServer::get_singleton()->process_events();
-		hidScanInput();
-		if (hidKeysDown() & KEY_SELECT)
-        {
-            printf("The select key has been pressed\n");
-            break;
-        }
-
         if (Main::iteration())
         {
             break;
@@ -85,11 +80,7 @@ void OS_3DS::run() {
 void OS_3DS::set_main_loop(MainLoop *p_main_loop){
     main_loop = p_main_loop;
 }
-void OS_3DS::setup() {
-    set_current_rendering_driver_name("CITRO3D");
-    set_current_rendering_method("CITRO3D");
-    set_display_driver_id(0);
-}
+
 MainLoop *OS_3DS::get_main_loop() const {
     return main_loop;
 }

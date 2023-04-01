@@ -99,8 +99,9 @@ def get_flags():
         ("builtin_pcre2_with_jit", False),
         ('builtin_mbedtls', False),
         ('builtin_miniupnpc', False),
-        ('builtin_libpng', True),
-        ('builtin_freetype', True),
+        ('builtin_libpng', False),
+        ('builtin_freetype', False),
+        ('builtin_zlib', False),
         ('vulkan', False),
         ('gles3', False)
     ]
@@ -142,7 +143,7 @@ def configure_cross(env):
     env["SHLIBSUFFIX"] = ".so"
     dkp_path = os.getenv("DEVKITPRO")
     env.Append(CPPPATH=['#platform/3ds'])
-    env.Append(CCFLAGS=['-Wall', '-mword-relocations', '-ffunction-sections', '-fconserve-stack',
+    env.Append(CCFLAGS=['-Wall', '-mword-relocations', '-ffunction-sections',
                '-fdata-sections', '-fno-exceptions', '-Wl,-dead_strip'])
     env.Append(CCFLAGS=['-D__3DS__', '-DLIBC_FILEIO_ENABLED', '-DNO_SAFE_CAST',
                '-DNEED_LONG_INT', '-D_XOPEN_SOURCE=500', '-DRW_LOCK_H'])
@@ -154,7 +155,10 @@ def configure_cross(env):
                         "/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])
     env.Append(LINKFLAGS=['-specs=3dsx.specs', '-march=armv6k',
                '-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard'])
-    env.Append(LIBS=['ctru'])
+    if env["target"] == "template_debug":
+        env.Append(LIBS=['citro3d', 'ctru', 'freetype', 'bz2', 'png', 'z'])
+    else:
+        env.Append(LIBS=['citro3d', 'ctru', 'freetype', 'bz2', 'png', 'z'])
 
 
 def configure_misc(env):

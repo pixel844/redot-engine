@@ -33,7 +33,7 @@
 
 #include "servers/rendering/renderer_canvas_render.h"
 
-class RasterizerCanvasCITRO3D : public RendererCanvasRender {
+class RasterizerCanvasCitro3D : public RendererCanvasRender {
 public:
 	PolygonID request_polygon(const Vector<int> &p_indices, const Vector<Point2> &p_points, const Vector<Color> &p_colors, const Vector<Point2> &p_uvs = Vector<Point2>(), const Vector<int> &p_bones = Vector<int>(), const Vector<float> &p_weights = Vector<float>()) override { return 0; }
 	void free_polygon(PolygonID p_polygon) override {}
@@ -55,8 +55,8 @@ public:
 	bool free(RID p_rid) override { return true; }
 	void update() override {}
 
-	RasterizerCanvasCITRO3D() {}
-	~RasterizerCanvasCITRO3D() {}
+	RasterizerCanvasCitro3D() {}
+	~RasterizerCanvasCitro3D() {}
 };
 
 #endif // RASTERIZER_CANVAS_CITRO3D_H

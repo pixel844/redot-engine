@@ -34,7 +34,7 @@
 #include "servers/rendering/storage/material_storage.h"
 #include "servers/rendering/storage/utilities.h"
 
-namespace RendererCITRO3D {
+namespace RendererCitro3D {
 
 class MaterialStorage : public RendererMaterialStorage {
 public:

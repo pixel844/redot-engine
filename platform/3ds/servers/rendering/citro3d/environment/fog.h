@@ -33,7 +33,7 @@
 
 #include "servers/rendering/environment/renderer_fog.h"
 
-namespace RendererCITRO3D {
+namespace RendererCitro3D {
 
 class Fog : public RendererFog {
 public:
@@ -50,6 +50,6 @@ public:
 	virtual RS::FogVolumeShape fog_volume_get_shape(RID p_fog_volume) const override { return RS::FOG_VOLUME_SHAPE_BOX; }
 };
 
-} // namespace RendererCITRO3D
+} // namespace RendererCitro3D
 
 #endif // FOG_CITRO3D_H

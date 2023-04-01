@@ -33,7 +33,7 @@
 
 #include "servers/rendering/storage/particles_storage.h"
 
-namespace RendererCITRO3D {
+namespace RendererCitro3D {
 
 class ParticlesStorage : public RendererParticlesStorage {
 public:
@@ -118,6 +118,6 @@ public:
 	virtual bool particles_is_inactive(RID p_particles) const override { return false; }
 };
 
-} // namespace RendererCITRO3D
+} // namespace RendererCitro3D
 
 #endif // PARTICLES_STORAGE_CITRO3D_H
