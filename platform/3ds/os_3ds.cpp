@@ -1,12 +1,14 @@
 #include "platform_config.h"
 #include "os_3ds.h"
 #include <main/main.h>
-#include <servers/rendering_server.h>
+#include "servers/display_server.h"
+#include "servers/rendering/citro3d/display_server_citro3d.h"
+#include "servers/rendering_server.h"
 #include "filesystem/file_access_3ds.h"
 #include "filesystem/dir_access_3ds.h"
-#include "renderer/CitroRenderer.h"
-#include "servers/display_server.h"
 #include <time.h>
+
+
 static aptHookCookie apt_hook_cookie;
 static void apt_hook_callback(APT_HookType hook, void* param)
 {
@@ -14,7 +16,6 @@ static void apt_hook_callback(APT_HookType hook, void* param)
 		
 	}
 }
-
 void OS_3DS::initialize_core() {
     ticks_start = svcGetSystemTick();
     gfxInitDefault();
@@ -31,6 +32,7 @@ void OS_3DS::initialize_core() {
     DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_FILESYSTEM);
+    DisplayServerCITRO3D::register_citro3d_driver();
 }   
 void OS_3DS::finalize() {
     psExit();
@@ -80,7 +82,11 @@ void OS_3DS::run() {
 void OS_3DS::set_main_loop(MainLoop *p_main_loop){
     main_loop = p_main_loop;
 }
-
+void OS_3DS::setup() {
+    set_current_rendering_driver_name("CITRO3D");
+    set_current_rendering_method("CITRO3D");
+    set_display_driver_id(0);
+}
 MainLoop *OS_3DS::get_main_loop() const {
     return main_loop;
 }
@@ -93,7 +99,15 @@ void OS_3DS::delete_main_loop() {
     main_loop = nullptr;
 }
 
-
+uint64_t OS_3DS::get_static_memory_usage() const {
+    return osGetMemRegionUsed(MEMREGION_APPLICATION) ;
+}
+uint64_t OS_3DS::get_static_memory_peak_usage() const{
+    return osGetMemRegionSize(MEMREGION_APPLICATION);
+}
+uint64_t OS_3DS::get_free_static_memory() const{
+    return osGetMemRegionFree(MEMREGION_APPLICATION);
+}
 
 bool OS_3DS::_check_internal_feature_support(const String &p_feature) {
     return false;

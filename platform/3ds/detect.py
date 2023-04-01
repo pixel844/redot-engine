@@ -50,9 +50,9 @@ def get_flags():
 		("module_glslang_enabled",False),
 		('module_dds_enabled',False),
 		('module_gltf_enabled',False),
-		('module_csg_enabled', False),
+		('module_csg_enabled', True),
 		('module_gridmap_enabled',False),
-		('module_freetype_enabled',False),
+		('module_freetype_enabled',True),
 		('module_ogg_enabled',False),
 		('module_tga_enabled',False),
 		('module_denoise_enabled',False),
@@ -89,10 +89,25 @@ def get_flags():
 		('builtin_mbedtls', False),
 		('builtin_miniupnpc',False),
 		('builtin_libpng',False),
+		('builtin_freetype',False),
 		('vulkan',False),
 		('gles3', False)
 	]
 
+def build_shader_gen(target, source, env, for_signature):
+    return "picasso -o {} {}".format(target[0], source[0])
+
+
+def build_shader_header(target, source,env):
+    import os
+    data = source[0].get_contents()
+    data_str = ",".join([str(x) for x in data])
+    name = os.path.basename(str(target[0]))[:-2]
+    target[0].prepare()
+    with open(str(target[0]), 'w') as f:
+        f.write("/* Auto-generated from {} */\n".format(str(source[0])))
+        f.write("static uint8_t shader_builtin_{}[] =\n{{{}}};".format(
+            name, data_str))
 
 def configure_arch(env):
 		env.Append(CCFLAGS=['-march=armv6k','-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard'])
@@ -109,27 +124,25 @@ def configure_cross(env):
 	env["STRIP"] = triple + "-strip"
 	env["OBJCOPY"] = triple + "-objcopy"
 	env["PROGSUFFIX"] = ".elf"
-
-def configure_target(env):
-	pass # use engine default
-
-def configure_misc(env):
 	env["SHLIBSUFFIX"] = ".so"
 	dkp_path = os.getenv("DEVKITPRO")
-	if env["PLATFORM"] == "win32":
-		env.use_windows_spawn_fix()
 	env.Append(CPPPATH=['#platform/3ds'])
 	env.Append(CCFLAGS=['-Wall','-mword-relocations','-ffunction-sections', '-fdata-sections', '-fno-exceptions','-Wl,-dead_strip'])
 	env.Append(CCFLAGS=['-D__3DS__', '-DLIBC_FILEIO_ENABLED','-DNO_SAFE_CAST','-DNEED_LONG_INT','-D_XOPEN_SOURCE=500','-DRW_LOCK_H'])
 	env.Append(CCFLAGS=['-U__INT32_TYPE__','-U__UINT32_TYPE__','-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int','-DUNIX_SOCKET_UNAVAILABLE','-DPAD_ALIGN=16'])
-	env.Append(CPPPATH=[dkp_path +"/portlibs/3ds/include",dkp_path +"/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
+	env.Append(CPPPATH=[dkp_path +"/portlibs/3ds/include",dkp_path +"/portlibs/3ds/include/freetype2",dkp_path +"/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
 	env.Append(LIBPATH=[dkp_path+"/portlibs/armv6k/lib", dkp_path +
                "/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])
-	env.Append(LINKFLAGS=["-Wl,-S", "-Wl,-x",'-specs=3dsx.specs','-march=armv6k','-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard','-Wl,--gc-sections'])
-	env.Append(LIBS=['ctru','png'])
+	env.Append(LINKFLAGS=['-specs=3dsx.specs','-march=armv6k','-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard'])
+	env.Append(LIBS=['ctru','png','freetype','bz2'])
+
+def configure_misc(env):
+	if env["PLATFORM"] == "win32":
+		env.use_windows_spawn_fix()
+	env.Append(BUILDERS={'PICA': env.Builder(generator=build_shader_gen, suffix='.shbin', src_suffix='.pica')})
+	env.Append(BUILDERS={'PICA_HEADER': env.Builder(action=build_shader_header, suffix='.h', src_suffix='.shbin')})
 
 def configure(env):
 	configure_arch(env)
 	configure_cross(env)
-	configure_target(env)
 	configure_misc(env)

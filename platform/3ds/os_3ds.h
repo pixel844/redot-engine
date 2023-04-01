@@ -3,12 +3,14 @@
 #include <core/os/os.h>
 #include <core/input/input.h>
 #include <unistd.h>
+
 class OS_3DS : public OS {
     public:
         void run();
         void initialize() override;
         void initialize_core();
 	    void initialize_joypads() override;
+        void setup();
         Error set_cwd(const String &p_cwd) override {
             if (chdir(p_cwd.utf8().get_data()) != 0) {
 		        return ERR_CANT_OPEN;
@@ -16,6 +18,9 @@ class OS_3DS : public OS {
             return OK;
         };
         void set_main_loop(MainLoop *p_main_loop) override;
+        virtual uint64_t get_static_memory_usage() const;
+	    virtual uint64_t get_static_memory_peak_usage() const;
+	    virtual uint64_t get_free_static_memory() const;
         MainLoop *get_main_loop() const override;
         void delete_main_loop() override;
 
@@ -25,7 +30,6 @@ class OS_3DS : public OS {
         bool _check_internal_feature_support(const String &p_feature) override;
 
         Vector<String> get_video_adapter_driver_info() const override;
-
         String get_stdin_string() override;
 
         Error get_entropy(uint8_t *r_buffer, int p_bytes) override;
@@ -50,10 +54,11 @@ class OS_3DS : public OS {
         void delay_usec(uint32_t p_usec) const override;
         uint64_t get_ticks_usec() const override;
 
+        void initialize_theme_db();
+        void finalize_theme_db();
     private:
         MainLoop *main_loop = nullptr;
         SwkbdState *keyboard_state = nullptr;
         uint64_t ticks_start = 0;
-
 };
 #endif
