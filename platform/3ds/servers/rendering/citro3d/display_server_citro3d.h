@@ -40,9 +40,9 @@ private:
 	friend class DisplayServer;
 
 	static Vector<String> get_rendering_drivers_func() {
-		Vector<String> drivers;
+		  Vector<String> drivers;
 		drivers.push_back("CITRO3D");
-		return drivers;
+		 return drivers;
 	}
 
 	static DisplayServer *create_func(const String &p_rendering_driver, DisplayServer::WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Error &r_error) {

@@ -6,6 +6,7 @@
 
 class OS_3DS : public OS {
     public:
+        OS_3DS();
         void run();
         void initialize() override;
         void initialize_core();
@@ -17,6 +18,9 @@ class OS_3DS : public OS {
 	        }
             return OK;
         };
+        String get_resource_dir() const override {
+            return "sdmc:/3ds/";
+        }
         void set_main_loop(MainLoop *p_main_loop) override;
         virtual uint64_t get_static_memory_usage() const;
 	    virtual uint64_t get_static_memory_peak_usage() const;

@@ -16,16 +16,18 @@ static void apt_hook_callback(APT_HookType hook, void* param)
 		
 	}
 }
-void OS_3DS::initialize_core() {
-    ticks_start = svcGetSystemTick();
+
+OS_3DS::OS_3DS(){
     gfxInitDefault();
     consoleInit(GFX_BOTTOM,NULL);
     osSetSpeedupEnable(true);
     psInit();
     archiveMountSdmc();
     romfsInit();
-    chdir("sdmc:/");
     aptHook(&apt_hook_cookie, apt_hook_callback, this);
+}
+void OS_3DS::initialize_core() {
+    ticks_start = svcGetSystemTick();
     FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_USERDATA);
 	FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_FILESYSTEM);
@@ -43,6 +45,7 @@ void OS_3DS::finalize() {
 void OS_3DS::finalize_core() {
 
 }
+
 void OS_3DS::initialize() {
     main_loop = nullptr;
     initialize_core();

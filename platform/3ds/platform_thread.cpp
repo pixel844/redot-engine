@@ -49,7 +49,7 @@ void Thread::start(Thread::Callback p_callback, void *p_user, const Settings &p_
 		thread = empty_thread;
 	}
     
-	CTRThread new_thread = threadCreate(p_callback,p_user,STACKSIZE,p_settings.priority - 1,-2,false);
+	CTRThread new_thread = threadCreate(p_callback,p_user,64 * 1024,0x30 - p_settings.priority - 1,-1,false);
 	thread = new_thread;
 	id = _thread_id_hash(threadGetHandle(thread));
 }
