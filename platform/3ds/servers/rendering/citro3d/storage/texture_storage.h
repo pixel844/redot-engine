@@ -33,17 +33,36 @@
 
 #include "servers/rendering/rendering_server_globals.h"
 #include "servers/rendering/storage/texture_storage.h"
+#include <citro3d.h>
 
 namespace RendererCitro3D {
-
+struct Texture {
+	uint32_t flags;
+	int width, height;
+	C3D_Tex tex;
+	Image::Format format;
+	Ref<Image> image;
+	Texture() {
+		tex.data = NULL;
+		flags = width = height = 0;
+		format = Image::FORMAT_L8;
+	}
+};
+struct RenderTarget {
+	Texture *texture_ptr;
+	RID texture;
+	C3D_RenderTarget *target;
+	uint32_t view_count = 1;
+	Size2i size;
+	bool clear_requested;
+	Color clear_color;
+	bool direct_to_screen;
+};
 class TextureStorage : public RendererTextureStorage {
 private:
 	static TextureStorage *singleton;
 
-	struct CTRTexture {
-		Ref<Image> image;
-	};
-	mutable RID_PtrOwner<CTRTexture> texture_owner;
+	mutable RID_PtrOwner<Texture> texture_owner;
 
 public:
 	static TextureStorage *get_singleton() {
@@ -72,21 +91,21 @@ public:
 	bool owns_texture(RID p_rid) { return texture_owner.owns(p_rid); };
 
 	virtual RID texture_allocate() override {
-		CTRTexture *texture = memnew(CTRTexture);
+		Texture *texture = memnew(Texture);
 		ERR_FAIL_COND_V(!texture, RID());
 		return texture_owner.make_rid(texture);
 	};
 
 	virtual void texture_free(RID p_rid) override {
 		// delete the texture
-		CTRTexture *texture = texture_owner.get_or_null(p_rid);
+		Texture *texture = texture_owner.get_or_null(p_rid);
 		ERR_FAIL_COND(!texture);
 		texture_owner.free(p_rid);
 		memdelete(texture);
 	};
 
 	virtual void texture_2d_initialize(RID p_texture, const Ref<Image> &p_image) override {
-		CTRTexture *t = texture_owner.get_or_null(p_texture);
+		Texture *t = texture_owner.get_or_null(p_texture);
 		ERR_FAIL_COND(!t);
 		t->image = p_image->duplicate();
 	};
@@ -104,7 +123,7 @@ public:
 	virtual void texture_3d_placeholder_initialize(RID p_texture) override{};
 
 	virtual Ref<Image> texture_2d_get(RID p_texture) const override {
-		CTRTexture *t = texture_owner.get_or_null(p_texture);
+		Texture *t = texture_owner.get_or_null(p_texture);
 		ERR_FAIL_COND_V(!t, Ref<Image>());
 		return t->image;
 	};
@@ -158,27 +177,30 @@ public:
 	virtual void decal_instance_set_sorting_offset(RID p_decal_instance, float p_sorting_offset) override {}
 
 	/* RENDER TARGET */
+	mutable RID_Owner<RenderTarget> render_target_owner;
+	RenderTarget *get_render_target(RID p_rid) { return render_target_owner.get_or_null(p_rid); };
+	bool owns_render_target(RID p_rid) { return render_target_owner.owns(p_rid); };
 
-	virtual RID render_target_create() override { return RID(); }
-	virtual void render_target_free(RID p_rid) override {}
+	virtual RID render_target_create() override;
+	virtual void render_target_free(RID p_rid) override;
 	virtual void render_target_set_position(RID p_render_target, int p_x, int p_y) override {}
 	virtual Point2i render_target_get_position(RID p_render_target) const override { return Point2i(); }
-	virtual void render_target_set_size(RID p_render_target, int p_width, int p_height, uint32_t p_view_count) override {}
-	virtual Size2i render_target_get_size(RID p_render_target) const override { return Size2i(); }
+	virtual void render_target_set_size(RID p_render_target, int p_width, int p_height, uint32_t p_view_count) override;
+	virtual Size2i render_target_get_size(RID p_render_target) const override;
 	virtual void render_target_set_transparent(RID p_render_target, bool p_is_transparent) override {}
 	virtual bool render_target_get_transparent(RID p_render_target) const override { return false; }
-	virtual void render_target_set_direct_to_screen(RID p_render_target, bool p_direct_to_screen) override {}
-	virtual bool render_target_get_direct_to_screen(RID p_render_target) const override { return false; }
+	virtual void render_target_set_direct_to_screen(RID p_render_target, bool p_direct_to_screen) override;
+	virtual bool render_target_get_direct_to_screen(RID p_render_target) const override;
 	virtual bool render_target_was_used(RID p_render_target) const override { return false; }
 	virtual void render_target_set_as_unused(RID p_render_target) override {}
 	virtual void render_target_set_msaa(RID p_render_target, RS::ViewportMSAA p_msaa) override {}
 	virtual RS::ViewportMSAA render_target_get_msaa(RID p_render_target) const override { return RS::VIEWPORT_MSAA_DISABLED; }
 
-	virtual void render_target_request_clear(RID p_render_target, const Color &p_clear_color) override {}
-	virtual bool render_target_is_clear_requested(RID p_render_target) override { return false; }
-	virtual Color render_target_get_clear_request_color(RID p_render_target) override { return Color(); }
-	virtual void render_target_disable_clear_request(RID p_render_target) override {}
-	virtual void render_target_do_clear_request(RID p_render_target) override {}
+	virtual void render_target_request_clear(RID p_render_target, const Color &p_clear_color) override;
+	virtual bool render_target_is_clear_requested(RID p_render_target) override;
+	virtual Color render_target_get_clear_request_color(RID p_render_target) override;
+	virtual void render_target_disable_clear_request(RID p_render_target) override;
+	virtual void render_target_do_clear_request(RID p_render_target) override;
 
 	virtual void render_target_set_sdf_size_and_scale(RID p_render_target, RS::ViewportSDFOversize p_size, RS::ViewportSDFScale p_scale) override {}
 	virtual Rect2i render_target_get_sdf_rect(RID p_render_target) const override { return Rect2i(); }
@@ -197,6 +219,6 @@ public:
 	virtual RID render_target_get_texture(RID p_render_target) override { return RID(); }
 };
 
-} // namespace RendererCITRO3D
+} //namespace RendererCitro3D
 
 #endif // TEXTURE_STORAGE_CITRO3D_H

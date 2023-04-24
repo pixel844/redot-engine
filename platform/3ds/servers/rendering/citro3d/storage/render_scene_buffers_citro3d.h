@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  render_scene_buffers_gles3.h                                          */
+/*  render_scene_buffers_Citro3D.h                                          */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,22 +28,14 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifndef RENDER_SCENE_BUFFERS_GLES3_H
-#define RENDER_SCENE_BUFFERS_GLES3_H
-
-#ifdef GLES3_ENABLED
-
-#include "servers/rendering/storage/render_scene_buffers.h"
+#ifndef RENDER_SCENE_BUFFERS_Citro3D_H
+#define RENDER_SCENE_BUFFERS_Citro3D_H
 
 #include "platform_config.h"
-#ifndef OPENGL_INCLUDE_H
-#include <CITRO3D/gl3.h>
-#else
-#include OPENGL_INCLUDE_H
-#endif
+#include "servers/rendering/storage/render_scene_buffers.h"
 
-class RenderSceneBuffersGLES3 : public RenderSceneBuffers {
-	GDCLASS(RenderSceneBuffersGLES3, RenderSceneBuffers);
+class RenderSceneBuffersCitro3D : public RenderSceneBuffers {
+	GDCLASS(RenderSceneBuffersCitro3D, RenderSceneBuffers);
 
 public:
 	// Original implementation, need to investigate which ones we'll keep like this and what we'll change...
@@ -80,7 +72,7 @@ public:
 
 private:
 public:
-	virtual ~RenderSceneBuffersGLES3();
+	virtual ~RenderSceneBuffersCitro3D();
 	virtual void configure(RID p_render_target, const Size2i p_internal_size, const Size2i p_target_size, RS::ViewportScaling3DMode p_scaling_3d_mode, float p_fsr_sharpness, float p_texture_mipmap_bias, RS::ViewportMSAA p_msaa, RenderingServer::ViewportScreenSpaceAA p_screen_space_aa, bool p_use_taa, bool p_use_debanding, uint32_t p_view_count) override;
 
 	virtual void set_fsr_sharpness(float p_fsr_sharpness) override{};
@@ -89,7 +81,4 @@ public:
 
 	void free_render_buffer_data();
 };
-
-#endif // GLES3_ENABLED
-
-#endif // RENDER_SCENE_BUFFERS_GLES3_H
+#endif // RENDER_SCENE_BUFFERS_Citro3D_H

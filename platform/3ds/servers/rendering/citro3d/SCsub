@@ -12,7 +12,8 @@ if 'PICA' in env['BUILDERS']:
         env.PICA_HEADER(shader)
 
 source_files = [
-    "rasterizer_citro3d.cpp"
+    "rasterizer_citro3d.cpp",
+    "rasterizer_scene_citro3d.cpp"
 ]
 
 objects = []

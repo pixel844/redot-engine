@@ -5,7 +5,9 @@ Import("env")
 source_files = [
     "mesh_storage.cpp",
     "texture_storage.cpp",
-    "utilities.cpp"
+    "material_storage.cpp",
+    "utilities.cpp",
+    "render_scene_buffers_citro3d.cpp"
 ]
 
 objects = []

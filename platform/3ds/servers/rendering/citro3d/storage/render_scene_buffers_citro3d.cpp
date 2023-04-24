@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  render_scene_buffers_gles3.cpp                                        */
+/*  render_scene_buffers_Citro3D.cpp                                        */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -28,17 +28,15 @@
 /* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                 */
 /**************************************************************************/
 
-#ifdef GLES3_ENABLED
-
-#include "render_scene_buffers_gles3.h"
+#include "render_scene_buffers_citro3d.h"
 #include "texture_storage.h"
 
-RenderSceneBuffersGLES3::~RenderSceneBuffersGLES3() {
+RenderSceneBuffersCitro3D::~RenderSceneBuffersCitro3D() {
 	free_render_buffer_data();
 }
 
-void RenderSceneBuffersGLES3::configure(RID p_render_target, const Size2i p_internal_size, const Size2i p_target_size, RS::ViewportScaling3DMode p_scaling_3d_mode, float p_fsr_sharpness, float p_texture_mipmap_bias, RS::ViewportMSAA p_msaa, RenderingServer::ViewportScreenSpaceAA p_screen_space_aa, bool p_use_taa, bool p_use_debanding, uint32_t p_view_count) {
-	CITRO3D::TextureStorage *texture_storage = CITRO3D::TextureStorage::get_singleton();
+void RenderSceneBuffersCitro3D::configure(RID p_render_target, const Size2i p_internal_size, const Size2i p_target_size, RS::ViewportScaling3DMode p_scaling_3d_mode, float p_fsr_sharpness, float p_texture_mipmap_bias, RS::ViewportMSAA p_msaa, RenderingServer::ViewportScreenSpaceAA p_screen_space_aa, bool p_use_taa, bool p_use_debanding, uint32_t p_view_count) {
+	RendererCitro3D::TextureStorage *texture_storage = RendererCitro3D::TextureStorage::get_singleton();
 
 	//internal_size.x = p_internal_size.x; // ignore for now
 	//internal_size.y = p_internal_size.y;
@@ -55,12 +53,10 @@ void RenderSceneBuffersGLES3::configure(RID p_render_target, const Size2i p_inte
 
 	free_render_buffer_data();
 
-	CITRO3D::RenderTarget *rt = texture_storage->get_render_target(p_render_target);
+	RendererCitro3D::RenderTarget *rt = texture_storage->get_render_target(p_render_target);
 
-	is_transparent = rt->is_transparent;
+	//is_transparent = rt->is_transparent;
 }
 
-void RenderSceneBuffersGLES3::free_render_buffer_data() {
+void RenderSceneBuffersCitro3D::free_render_buffer_data() {
 }
-
-#endif // GLES3_ENABLED

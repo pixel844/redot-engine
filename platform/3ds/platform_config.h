@@ -33,6 +33,6 @@
 #include <3ds.h>
 #undef Thread
 #define PLATFORM_THREAD_OVERRIDE
-#define STACKSIZE (64 * 1024)
+#define STACKSIZE (4 * 1024)
 #include <mutex>
 #endif

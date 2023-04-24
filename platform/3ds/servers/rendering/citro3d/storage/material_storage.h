@@ -31,10 +31,39 @@
 #ifndef MATERIAL_STORAGE_CITRO3D_H
 #define MATERIAL_STORAGE_CITRO3D_H
 
+#include "core/templates/rid_owner.h"
 #include "servers/rendering/storage/material_storage.h"
 #include "servers/rendering/storage/utilities.h"
+#include <citro3d.h>
 
 namespace RendererCitro3D {
+struct Material;
+struct Shader {
+	DVLB_s *dvlb;
+	shaderProgram_s *program;
+	int uniform_projection;
+	C3D_Mtx projection;
+
+	HashSet<Material *> owners;
+
+	u32 *data;
+};
+
+struct Material {
+	RID self;
+	Shader *shader = nullptr;
+	RS::ShaderMode shader_mode = RS::SHADER_MAX;
+	uint32_t shader_id = 0;
+	bool uniform_dirty = false;
+	bool texture_dirty = false;
+	HashMap<StringName, Variant> params;
+	int32_t priority = 0;
+	RID next_pass;
+	SelfList<Material> update_element;
+	Dependency dependency;
+	Material() :
+			update_element(this) {}
+};
 
 class MaterialStorage : public RendererMaterialStorage {
 public:
@@ -57,10 +86,10 @@ public:
 	virtual void global_shader_parameters_instance_update(RID p_instance, int p_index, const Variant &p_value, int p_flags_count = 0) override {}
 
 	/* SHADER API */
-
-	virtual RID shader_allocate() override { return RID(); }
-	virtual void shader_initialize(RID p_rid) override {}
-	virtual void shader_free(RID p_rid) override{};
+	mutable RID_Owner<Shader, true> shader_owner;
+	virtual RID shader_allocate() override;
+	virtual void shader_initialize(RID p_rid) override;
+	virtual void shader_free(RID p_rid) override;
 
 	virtual void shader_set_code(RID p_shader, const String &p_code) override {}
 	virtual void shader_set_path_hint(RID p_shader, const String &p_code) override {}
@@ -93,6 +122,6 @@ public:
 	virtual void material_update_dependency(RID p_material, DependencyTracker *p_instance) override {}
 };
 
-} // namespace RendererCITRO3D
+} //namespace RendererCitro3D
 
 #endif // MATERIAL_STORAGE_CITRO3D_H

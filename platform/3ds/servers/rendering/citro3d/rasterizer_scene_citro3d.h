@@ -33,13 +33,54 @@
 
 #include "core/templates/paged_allocator.h"
 #include "servers/rendering/renderer_scene_render.h"
+#include "storage/render_scene_buffers_citro3d.h"
 #include "storage/utilities.h"
+
+struct RenderDataC3D {
+	Ref<RenderSceneBuffersCitro3D> render_buffers;
+	bool transparent_bg = false;
+
+	Transform3D cam_transform;
+	Transform3D inv_cam_transform;
+	Projection cam_projection;
+	bool cam_orthogonal = false;
+	uint32_t camera_visible_layers = 0xFFFFFFFF;
+
+	// For stereo rendering
+	uint32_t view_count = 1;
+	Vector3 view_eye_offset[RendererSceneRender::MAX_RENDER_VIEWS];
+	Projection view_projection[RendererSceneRender::MAX_RENDER_VIEWS];
+
+	float z_near = 0.0;
+	float z_far = 0.0;
+
+	const PagedArray<RenderGeometryInstance *> *instances = nullptr;
+	const PagedArray<RID> *lights = nullptr;
+	const PagedArray<RID> *reflection_probes = nullptr;
+	RID environment;
+	RID camera_attributes;
+	RID reflection_probe;
+	int reflection_probe_pass = 0;
+
+	float lod_distance_multiplier = 0.0;
+	float screen_mesh_lod_threshold = 0.0;
+
+	uint32_t directional_light_count = 0;
+	uint32_t spot_light_count = 0;
+	uint32_t omni_light_count = 0;
+
+	RenderingMethod::RenderInfo *render_info = nullptr;
+};
 
 class RasterizerSceneCitro3D : public RendererSceneRender {
 public:
-	class GeometryInstanceCITRO3D : public RenderGeometryInstance {
+	static RasterizerSceneCitro3D *singleton;
+	RS::ViewportDebugDraw debug_draw = RS::VIEWPORT_DEBUG_DRAW_DISABLED;
+	uint64_t scene_pass = 0;
+
+	class GeometryInstanceCitro3D : public RenderGeometryInstance {
 	public:
-		GeometryInstanceCITRO3D() {}
+		GeometryInstanceCitro3D() {}
 
 		virtual void _mark_dirty() override {}
 
@@ -73,20 +114,20 @@ public:
 		virtual void set_softshadow_projector_pairing(bool p_softshadow, bool p_projector) override {}
 	};
 
-	PagedAllocator<GeometryInstanceCITRO3D> geometry_instance_alloc;
+	PagedAllocator<GeometryInstanceCitro3D> geometry_instance_alloc;
 
 public:
 	RenderGeometryInstance *geometry_instance_create(RID p_base) override {
 		RS::InstanceType type = RendererCitro3D::Utilities::get_singleton()->get_base_type(p_base);
 		ERR_FAIL_COND_V(!((1 << type) & RS::INSTANCE_GEOMETRY_MASK), nullptr);
 
-		GeometryInstanceCITRO3D *ginstance = geometry_instance_alloc.alloc();
+		GeometryInstanceCitro3D *ginstance = geometry_instance_alloc.alloc();
 
 		return ginstance;
 	}
 
 	void geometry_instance_free(RenderGeometryInstance *p_geometry_instance) override {
-		GeometryInstanceCITRO3D *ginstance = static_cast<GeometryInstanceCITRO3D *>(p_geometry_instance);
+		GeometryInstanceCitro3D *ginstance = static_cast<GeometryInstanceCitro3D *>(p_geometry_instance);
 		ERR_FAIL_COND(!ginstance);
 
 		geometry_instance_alloc.free(ginstance);
@@ -145,7 +186,7 @@ public:
 
 	void voxel_gi_set_quality(RS::VoxelGIQuality) override {}
 
-	void render_scene(const Ref<RenderSceneBuffers> &p_render_buffers, const CameraData *p_camera_data, const CameraData *p_prev_camera_data, const PagedArray<RenderGeometryInstance *> &p_instances, const PagedArray<RID> &p_lights, const PagedArray<RID> &p_reflection_probes, const PagedArray<RID> &p_voxel_gi_instances, const PagedArray<RID> &p_decals, const PagedArray<RID> &p_lightmaps, const PagedArray<RID> &p_fog_volumes, RID p_environment, RID p_camera_attributes, RID p_shadow_atlas, RID p_occluder_debug_tex, RID p_reflection_atlas, RID p_reflection_probe, int p_reflection_probe_pass, float p_screen_mesh_lod_threshold, const RenderShadowData *p_render_shadows, int p_render_shadow_count, const RenderSDFGIData *p_render_sdfgi_regions, int p_render_sdfgi_region_count, const RenderSDFGIUpdateData *p_sdfgi_update_data = nullptr, RenderingMethod::RenderInfo *r_info = nullptr) override {}
+	void render_scene(const Ref<RenderSceneBuffers> &p_render_buffers, const CameraData *p_camera_data, const CameraData *p_prev_camera_data, const PagedArray<RenderGeometryInstance *> &p_instances, const PagedArray<RID> &p_lights, const PagedArray<RID> &p_reflection_probes, const PagedArray<RID> &p_voxel_gi_instances, const PagedArray<RID> &p_decals, const PagedArray<RID> &p_lightmaps, const PagedArray<RID> &p_fog_volumes, RID p_environment, RID p_camera_attributes, RID p_shadow_atlas, RID p_occluder_debug_tex, RID p_reflection_atlas, RID p_reflection_probe, int p_reflection_probe_pass, float p_screen_mesh_lod_threshold, const RenderShadowData *p_render_shadows, int p_render_shadow_count, const RenderSDFGIData *p_render_sdfgi_regions, int p_render_sdfgi_region_count, const RenderSDFGIUpdateData *p_sdfgi_update_data = nullptr, RenderingMethod::RenderInfo *r_info = nullptr) override;
 	void render_material(const Transform3D &p_cam_transform, const Projection &p_cam_projection, bool p_cam_orthogonal, const PagedArray<RenderGeometryInstance *> &p_instances, RID p_framebuffer, const Rect2i &p_region) override {}
 	void render_particle_collider_heightfield(RID p_collider, const Transform3D &p_transform, const PagedArray<RenderGeometryInstance *> &p_instances) override {}
 
@@ -153,7 +194,7 @@ public:
 	void set_time(double p_time, double p_step) override {}
 	void set_debug_draw_mode(RS::ViewportDebugDraw p_debug_draw) override {}
 
-	Ref<RenderSceneBuffers> render_buffers_create() override { return Ref<RenderSceneBuffers>(); }
+	Ref<RenderSceneBuffers> render_buffers_create() override;
 	void gi_set_use_half_resolution(bool p_enable) override {}
 
 	void screen_space_roughness_limiter_set_active(bool p_enable, float p_amount, float p_curve) override {}

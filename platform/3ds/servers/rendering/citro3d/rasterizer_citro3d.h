@@ -33,19 +33,19 @@
 
 #include "core/templates/rid_owner.h"
 #include "core/templates/self_list.h"
-#include "scene/resources/mesh.h"
 #include "environment/fog.h"
 #include "environment/gi.h"
 #include "rasterizer_canvas_citro3d.h"
 #include "rasterizer_scene_citro3d.h"
+#include "scene/resources/mesh.h"
+#include "servers/rendering/renderer_compositor.h"
+#include "servers/rendering_server.h"
 #include "storage/light_storage.h"
 #include "storage/material_storage.h"
 #include "storage/mesh_storage.h"
 #include "storage/particles_storage.h"
 #include "storage/texture_storage.h"
 #include "storage/utilities.h"
-#include "servers/rendering/renderer_compositor.h"
-#include "servers/rendering_server.h"
 #include <citro3d.h>
 
 class RasterizerCitro3D : public RendererCompositor {
@@ -93,8 +93,8 @@ public:
 	void shader_init();
 
 	void prepare_for_blitting_render_targets() override {}
-	void blit_render_targets_to_screen(int p_screen, const BlitToScreen *p_render_targets, int p_amount) override {}
-
+	void blit_render_targets_to_screen(int p_screen, const BlitToScreen *p_render_targets, int p_amount) override;
+	void _blit_render_target_to_screen(RID p_render_target, int p_screen, const Rect2 &p_screen_rect, uint32_t p_layer, bool p_first);
 	void end_frame(bool p_swap_buffers) override;
 
 	void finalize() override;

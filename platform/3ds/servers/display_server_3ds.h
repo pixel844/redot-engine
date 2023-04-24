@@ -40,9 +40,9 @@ private:
 	friend class DisplayServer;
 
 	static Vector<String> get_rendering_drivers_func() {
-		  Vector<String> drivers;
+		Vector<String> drivers;
 		drivers.push_back("CITRO3D");
-		 return drivers;
+		return drivers;
 	}
 
 	static DisplayServer *create_func(const String &p_rendering_driver, DisplayServer::WindowMode p_mode, DisplayServer::VSyncMode p_vsync_mode, uint32_t p_flags, const Vector2i *p_position, const Vector2i &p_resolution, int p_screen, Error &r_error) {
@@ -57,12 +57,12 @@ public:
 
 	int get_screen_count() const override { return 1; }
 	int get_primary_screen() const override { return 0; };
-	Point2i screen_get_position(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return Point2i(); }
-	Size2i screen_get_size(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return Size2i(); }
-	Rect2i screen_get_usable_rect(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return Rect2i(); }
+	Point2i screen_get_position(int p_screen = SCREEN_OF_MAIN_WINDOW) const override;
+	Size2i screen_get_size(int p_screen = SCREEN_OF_MAIN_WINDOW) const override;
+	Rect2i screen_get_usable_rect(int p_screen = SCREEN_OF_MAIN_WINDOW) const override;
 	int screen_get_dpi(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return 96; /* 0 might cause issues */ }
-	float screen_get_scale(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return 1; }
-	float screen_get_max_scale() const override { return 1; }
+	float screen_get_scale(int p_screen = SCREEN_OF_MAIN_WINDOW) const override;
+	float screen_get_max_scale() const override;
 	float screen_get_refresh_rate(int p_screen = SCREEN_OF_MAIN_WINDOW) const override { return 60; }
 
 	Vector<DisplayServer::WindowID> get_window_list() const override { return Vector<DisplayServer::WindowID>(); }
@@ -97,14 +97,14 @@ public:
 	void window_set_transient(WindowID p_window, WindowID p_parent) override {}
 
 	void window_set_max_size(const Size2i p_size, WindowID p_window = MAIN_WINDOW_ID) override {}
-	Size2i window_get_max_size(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(); }
+	Size2i window_get_max_size(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(240, 400); }
 
 	void window_set_min_size(const Size2i p_size, WindowID p_window = MAIN_WINDOW_ID) override {}
-	Size2i window_get_min_size(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(); }
+	Size2i window_get_min_size(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(240, 400); }
 
 	void window_set_size(const Size2i p_size, WindowID p_window = MAIN_WINDOW_ID) override {}
-	Size2i window_get_size(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(); }
-	Size2i window_get_size_with_decorations(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(); }
+	Size2i window_get_size(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(240, 400); }
+	Size2i window_get_size_with_decorations(WindowID p_window = MAIN_WINDOW_ID) const override { return Size2i(240, 400); }
 
 	void window_set_mode(WindowMode p_mode, WindowID p_window = MAIN_WINDOW_ID) override {}
 	WindowMode window_get_mode(WindowID p_window = MAIN_WINDOW_ID) const override { return WINDOW_MODE_MINIMIZED; }
@@ -132,7 +132,7 @@ public:
 		//print_line("Registered CITRO3D display server");
 	}
 
-	bool get_swap_cancel_ok() override{return true;}
+	bool get_swap_cancel_ok() override { return true; }
 	void swap_buffers() override;
 
 	void process_events() override;
@@ -141,9 +141,10 @@ public:
 
 	DisplayServer3DS();
 	~DisplayServer3DS();
-	private:
-		SwkbdState keyboard_state;
-		SwkbdStatusData keyboard_status;
+
+private:
+	SwkbdState keyboard_state;
+	SwkbdStatusData keyboard_status;
 };
 
 #endif // DISPLAY_SERVER_CITRO3D_H

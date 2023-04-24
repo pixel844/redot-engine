@@ -7,7 +7,7 @@ Thread::PlatformFunctions Thread::platform_functions;
 
 uint64_t Thread::_thread_id_hash(const Handle &p_t) {
 	u32 id;
-	svcGetThreadId(&id,p_t);
+	svcGetThreadId(&id, p_t);
 	static std::hash<u32> hasher;
 	return hasher(p_t);
 }
@@ -40,16 +40,16 @@ void Thread::callback(ID p_caller_id, const Settings &p_settings, Callback p_cal
 }
 
 void Thread::start(Thread::Callback p_callback, void *p_user, const Settings &p_settings) {
-		if (id != _thread_id_hash(0)) {
+	if (id != _thread_id_hash(0)) {
 #ifdef DEBUG_ENABLED
 		WARN_PRINT("A Thread object has been re-started without wait_to_finish() having been called on it. Please do so to ensure correct cleanup of the thread.");
 #endif
 		threadDetach(thread);
-		CTRThread empty_thread{nullptr};
+		CTRThread empty_thread{ nullptr };
 		thread = empty_thread;
 	}
-    
-	CTRThread new_thread = threadCreate(p_callback,p_user,STACKSIZE,0x30,0,false);
+
+	CTRThread new_thread = threadCreate(p_callback, p_user, STACKSIZE, 0x30, -1, false);
 	thread = new_thread;
 	id = _thread_id_hash(threadGetHandle(thread));
 }
@@ -61,8 +61,8 @@ bool Thread::is_started() const {
 void Thread::wait_to_finish() {
 	if (id != _thread_id_hash(0)) {
 		ERR_FAIL_COND_MSG(id == get_caller_id(), "A Thread can't wait for itself to finish.");
-		threadJoin(thread,U64_MAX);
-		CTRThread empty_thread{nullptr};
+		threadJoin(thread, U64_MAX);
+		CTRThread empty_thread{ nullptr };
 		thread = empty_thread;
 		id = _thread_id_hash(0);
 	}
@@ -78,7 +78,7 @@ Error Thread::set_name(const String &p_name) {
 
 Thread::Thread() {
 	u32 id;
-	svcGetThreadId(&id,CUR_THREAD_HANDLE);
+	svcGetThreadId(&id, CUR_THREAD_HANDLE);
 	caller_id = _thread_id_hash(id);
 }
 
