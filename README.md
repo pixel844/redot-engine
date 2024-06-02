@@ -1,3 +1,11 @@
+# Godot Engine 4 for 3DS
+
+This repository contains an unfinished port of the Godot 4 game engine for the Nintendo 3DS.
+
+The renderer is not yet functional, however, the engine does start and run gdscript code headless.
+
+https://github.com/SeleDreams/godot/assets/16335601/63dc3da9-5803-4393-9965-684c162f64f8
+
 # Godot Engine
 
 <p align="center">
