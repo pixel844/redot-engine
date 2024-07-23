@@ -2,6 +2,7 @@
 
 #include "core/object/script_language.h"
 #include "core/templates/safe_refcount.h"
+#include <bitset>
 
 Thread::PlatformFunctions Thread::platform_functions;
 

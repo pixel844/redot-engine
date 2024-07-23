@@ -5,9 +5,90 @@
 #undef Thread
 #include <atomic>
 #include <new>
-#include <c++/12.2.0/mutex>
-#include <c++/12.2.0/shared_mutex>
 namespace std {
+
+    template <typename Mutex>
+    class unique_lock {
+    public:
+        explicit unique_lock(Mutex& m) : m_(&m), owns_lock_(false) {
+            lock();
+        }
+
+        Mutex *mutex() {
+            return m_;
+        }
+
+        unique_lock(unique_lock&& other) noexcept : m_(other.m_), owns_lock_(other.owns_lock_) {
+            other.m_ = nullptr;
+            other.owns_lock_ = false;
+        }
+
+        ~unique_lock() {
+            if (owns_lock_) {
+                unlock();
+            }
+        }
+
+        void lock() {
+            if (!owns_lock_) {
+                m_->lock();
+                owns_lock_ = true;
+            }
+        }
+
+        bool try_lock() {
+            if (!owns_lock_ && m_->try_lock()) {
+                owns_lock_ = true;
+            }
+            return owns_lock_;
+        }
+
+        void unlock() {
+            if (owns_lock_) {
+                m_->unlock();
+                owns_lock_ = false;
+            }
+        }
+
+        bool owns_lock() const noexcept {
+            return owns_lock_;
+        }
+
+        unique_lock& operator=(unique_lock&& other) noexcept {
+            if (owns_lock_) {
+                unlock();
+            }
+            m_ = other.m_;
+            owns_lock_ = other.owns_lock_;
+            other.m_ = nullptr;
+            other.owns_lock_ = false;
+            return *this;
+        }
+
+
+
+    private:
+        Mutex* m_;
+        bool owns_lock_;
+    };
+    template <typename Mutex>
+    class lock_guard {
+    public:
+        explicit lock_guard(Mutex& m) : m_(&m) {
+            m_->lock();
+        }
+
+        ~lock_guard() {
+            m_->unlock();
+        }
+
+        lock_guard(const lock_guard&) = delete;
+        lock_guard& operator=(const lock_guard&) = delete;
+
+    private:
+        Mutex* m_;
+    };
+
 class condition_variable;
 
 class mutex {
@@ -119,7 +200,7 @@ class condition_variable
     {
         CondVar_Wait(&condition_variable,&_lock->_lock);
     }
-    void wait(const std::unique_lock<mutex> &_lock)
+    void wait(std::unique_lock<mutex> &_lock)
     {     
         wait(_lock.mutex());
     }
