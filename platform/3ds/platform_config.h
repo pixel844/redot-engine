@@ -35,4 +35,13 @@
 #define PLATFORM_THREAD_OVERRIDE
 #define STACKSIZE (4 * 1024)
 #include "mutex"
+#ifndef __ENET_TYPES_H__
+#define __ENET_TYPES_H__
+
+typedef uint8_t enet_uint8;       /**< unsigned 8-bit type  */
+typedef uint16_t enet_uint16;     /**< unsigned 16-bit type */
+typedef uint32_t enet_uint32;      /**< unsigned 32-bit type */
+
+#endif /* __ENET_TYPES_H__ */
+
 #endif

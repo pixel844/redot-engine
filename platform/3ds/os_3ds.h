@@ -18,7 +18,13 @@ class OS_3DS : public OS {
             return OK;
         };
         String get_resource_dir() const override {
-            return "sdmc:/3ds/";
+            return "romfs:/";
+        }
+        String get_user_data_dir() const override {
+            return "sdmc:/";
+        }
+        virtual int get_process_exit_code(const ProcessID &p_pid) const  {
+            return 0;
         }
         void set_main_loop(MainLoop *p_main_loop) override;
         virtual uint64_t get_static_memory_usage() const;

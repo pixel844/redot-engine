@@ -2,12 +2,12 @@
 #include "os_3ds.h"
 #include <main/main.h>
 #include "servers/display_server.h"
-#include "servers/display_server_3ds.h"
+#include "servers/display_server_headless.h"
 #include "servers/rendering_server.h"
 #include "filesystem/file_access_3ds.h"
 #include "filesystem/dir_access_3ds.h"
+#include "scene/main/scene_tree.h"
 #include <time.h>
-
 
 static aptHookCookie apt_hook_cookie;
 static void apt_hook_callback(APT_HookType hook, void* param)
@@ -18,22 +18,27 @@ static void apt_hook_callback(APT_HookType hook, void* param)
 }
 
 OS_3DS::OS_3DS(){
-    osSetSpeedupEnable(true);
-    psInit();
-    archiveMountSdmc();
-    romfsInit();
+
     aptHook(&apt_hook_cookie, apt_hook_callback, this);
 }
 
 void OS_3DS::initialize_core() {
+    osSetSpeedupEnable(true);
+    psInit();
+    archiveMountSdmc();
+    romfsInit();
+	gfxInitDefault();
+	consoleInit(GFX_BOTTOM, NULL);
+    
     ticks_start = svcGetSystemTick();
     FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_USERDATA);
 	FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_FILESYSTEM);
+
     DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_FILESYSTEM);
-    DisplayServer3DS::register_citro3d_driver();
+    //DisplayServer3DS::register_citro3d_driver();
 }   
 
 void OS_3DS::finalize() {
@@ -64,15 +69,17 @@ void OS_3DS::run() {
     }
 
     main_loop->initialize();
-
-    while (true)
+    while (!Main::iteration())
     {
         DisplayServer::get_singleton()->process_events();
-        if (Main::iteration())
-        {
-            break;
-        }
+        gspWaitForVBlank();
+        gfxSwapBuffers();
+        hidScanInput();
+        u32 kDown = hidKeysDown();
+        if (kDown & KEY_START)
+            SceneTree::get_singleton()->quit(EXIT_SUCCESS);
     }
+    
     main_loop->finalize();
 }
 

@@ -44,6 +44,7 @@ def get_opts():
 			"use_lsan", "Use Emscripten leak sanitizer (LSAN)", False),
 		BoolVariable("use_safe_heap",
 					 "Use Emscripten SAFE_HEAP sanitizer", False),
+		BoolVariable("no_strip","",True),
 		PathVariable("devkitpro","The path of the devkitpro SDK","")
 		
 	]
@@ -52,18 +53,24 @@ def get_opts():
 def get_flags():
 	return [
 		("optimize", "size"),
-
 		("arch", "arm32"),
 		('tools', False),
-		('debug_symbols', True),
-		('target', 'template_debug'),
 		("module_glslang_enabled", False),
 		('module_dds_enabled', False),
+		('module_fbx_enabled',False),
 		('module_gltf_enabled', False),
 		('module_csg_enabled', False),
+		('module_ktx_enabled',False),
+		('module_theora_enabled',False),
+		('module_interactive_music_enabled',False),
+		('module_mobile_vr_enabled',False),
+		('module_openxr_enabled',False),
+		('module_camera_enabled',False),
+		('module_multiplayer_enabled',False),
 		('module_gridmap_enabled', False),
 		('module_freetype_enabled', True),
 		('module_ogg_enabled', False),
+		('module_cvtt_enabled',False),
 		('module_tga_enabled', False),
 		('module_denoise_enabled', False),
 		('module_jsonrpg_enabled', False),
@@ -81,8 +88,8 @@ def get_flags():
 		('module_svg_enabled', False),
 		('module_mono_enabled', False),
 		('module_upnp_enabled', False),
-		('module_mobile_vr_enabled', False),
 		('module_multiplayer_enabled', False),
+		('module_webrtc_enabled', False),
 		('module_websocket_enabled', False),
 		('module_webxr_enabled', False),
 		('module_hdr_enabled', False),
@@ -137,7 +144,7 @@ def configure_cross(env):
 	triple = dkp_path + '/devkitARM/bin/arm-none-eabi'
 	env['CC'] = triple + '-gcc'
 	env['CXX'] = triple + '-g++'
-	env["LD"] = triple + "-g++"
+	env["LD"] = triple + "-ld"
 	env["AR"] = triple + "-ar"
 	env["RANLIB"] = triple + "-ranlib"
 	env["AS"] = triple + "-as"
@@ -149,17 +156,18 @@ def configure_cross(env):
 	env.Append(CCFLAGS=['-Wall', '-mword-relocations', '-ffunction-sections',
 			   '-fdata-sections', '-fno-exceptions', '-Wl,-dead_strip'])
 	env.Append(CCFLAGS=['-D__3DS__','-ffast-math', '-DLIBC_FILEIO_ENABLED', '-DNO_SAFE_CAST','-Wno-parentheses','-Wno-implicit-function-declaration',
-			   '-DNEED_LONG_INT', '-D_XOPEN_SOURCE=500', '-DRW_LOCK_H'])
-	env.Append(CCFLAGS=['-U__INT32_TYPE__', '-U__UINT32_TYPE__', '-D__INT32_TYPE__=int',
-			   '-D__UINT32_TYPE__=unsigned int', '-DUNIX_SOCKET_UNAVAILABLE', '-DPAD_ALIGN=16'])
+			    '-D_XOPEN_SOURCE=500', '-DRW_LOCK_H','-DUNIX_SOCKET_UNAVAILABLE','-Wincompatible-pointer-types'])
+
 	env.Append(CPPPATH=[dkp_path + "/portlibs/3ds/include", dkp_path + "/portlibs/3ds/include/freetype2", dkp_path +
 			   "/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
 	env.Append(LIBPATH=[dkp_path+"/portlibs/armv6k/lib", dkp_path +
 						"/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])
 	env.Append(LINKFLAGS=['-specs=3dsx.specs', '-march=armv6k',
 			   '-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard'])
+	env.Append(CCFLAGS=['-U__INT32_TYPE__', '-U__UINT32_TYPE__', '-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int', '-U__UINT32_MAX__', '-U__INT32_MAX__','-D__UINT32_MAX__=4294967295U', '-D__INT32_MAX__=2147483647'])
+ 
 	if env["target"] == "template_debug":
-		env.Append(LIBS=['citro3d', 'ctru', 'freetype', 'bz2', 'png', 'z'])
+		env.Append(LIBS=['citro3dd', 'ctrud', 'freetype', 'bz2', 'png', 'z'])
 	else:
 		env.Append(LIBS=['citro3d', 'ctru', 'freetype', 'bz2', 'png', 'z'])
 

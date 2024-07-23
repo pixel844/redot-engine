@@ -1,5 +1,5 @@
 /**************************************************************************/
-/*  file_access_unix.cpp                                                  */
+/*  file_access_3DS.cpp                                                  */
 /**************************************************************************/
 /*                         This file is part of:                          */
 /*                             GODOT ENGINE                               */
@@ -72,7 +72,7 @@ Error FileAccess3DS::open_internal(const String &p_path, int p_mode_flags) {
 	}
 
 	/* pretty much every implementation that uses fopen as primary
-	   backend (unix-compatible mostly) supports utf8 encoding */
+	   backend (3DS-compatible mostly) supports utf8 encoding */
 
 	//printf("opening %s as %s\n", p_path.utf8().get_data(), path.utf8().get_data());
 	struct stat st = {};
@@ -296,19 +296,19 @@ uint64_t FileAccess3DS::_get_modified_time(const String &p_file) {
 	}
 }
 
-uint32_t FileAccess3DS::_get_unix_permissions(const String &p_file) {
+BitField<FileAccess::UnixPermissionFlags> FileAccess3DS::_get_unix_permissions(const String &p_file) {
 	String file = fix_path(p_file);
-	struct stat flags = {};
-	int err = stat(file.utf8().get_data(), &flags);
+	struct stat status = {};
+	int err = stat(file.utf8().get_data(), &status);
 
 	if (!err) {
-		return flags.st_mode & 0x7FF; //only permissions
+		return status.st_mode & 0xFFF; //only permissions
 	} else {
-		ERR_FAIL_V_MSG(0, "Failed to get unix permissions for: " + p_file + ".");
+		ERR_FAIL_V_MSG(0, "Failed to get 3DS permissions for: " + p_file + ".");
 	}
 }
 
-Error FileAccess3DS::_set_unix_permissions(const String &p_file, uint32_t p_permissions) {
+Error FileAccess3DS::_set_unix_permissions(const String &p_file, BitField<UnixPermissionFlags> p_permissions) {
 	String file = fix_path(p_file);
 
 	int err = chmod(file.utf8().get_data(), p_permissions);
@@ -327,4 +327,63 @@ CloseNotificationFunc FileAccess3DS::close_notification_func = nullptr;
 
 FileAccess3DS::~FileAccess3DS() {
 	_close();
+}
+
+Error FileAccess3DS::resize(int64_t p_length) {
+	ERR_FAIL_NULL_V_MSG(f, FAILED, "File must be opened before use.");
+	int res = ::ftruncate(fileno(f), p_length);
+	switch (res) {
+		case 0:
+			return OK;
+		case EBADF:
+			return ERR_FILE_CANT_OPEN;
+		case EFBIG:
+			return ERR_OUT_OF_MEMORY;
+		case EINVAL:
+			return ERR_INVALID_PARAMETER;
+		default:
+			return FAILED;
+	}
+}
+
+bool FileAccess3DS::_get_hidden_attribute(const String &p_file) {
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+	String file = fix_path(p_file);
+
+	struct stat st = {};
+	int err = stat(file.utf8().get_data(), &st);
+	ERR_FAIL_COND_V_MSG(err, false, "Failed to get attributes for: " + p_file);
+
+	return (st.st_flags & UF_HIDDEN);
+#else
+	return false;
+#endif
+}
+
+Error FileAccess3DS::_set_hidden_attribute(const String &p_file, bool p_hidden) {
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+	String file = fix_path(p_file);
+
+	struct stat st = {};
+	int err = stat(file.utf8().get_data(), &st);
+	ERR_FAIL_COND_V_MSG(err, FAILED, "Failed to get attributes for: " + p_file);
+
+	if (p_hidden) {
+		err = chflags(file.utf8().get_data(), st.st_flags | UF_HIDDEN);
+	} else {
+		err = chflags(file.utf8().get_data(), st.st_flags & ~UF_HIDDEN);
+	}
+	ERR_FAIL_COND_V_MSG(err, FAILED, "Failed to set attributes for: " + p_file);
+	return OK;
+#else
+	return ERR_UNAVAILABLE;
+#endif
+}
+
+bool FileAccess3DS::_get_read_only_attribute(const String &p_file) {
+	return false;
+}
+
+Error FileAccess3DS::_set_read_only_attribute(const String &p_file, bool p_ro) {
+	return OK;
 }

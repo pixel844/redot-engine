@@ -1,9 +1,8 @@
 #include "main/main.h"
 #include "os_3ds.h"
 #include "platform_config.h"
-#include "servers/display_server_3ds.h"
+#include "servers/display_server.h"
 #include <sys/resource.h>
-#include <unistd.h>
 #include <filesystem>
 
 int __stacksize__ = 64 * 1024;
@@ -13,9 +12,9 @@ int main(int argc, char *argv[]) {
 	std::string without_filename = std::filesystem::path(argv[0]).remove_filename();
 	chdir(without_filename.c_str());
 	setlocale(LC_CTYPE, "");
-	printf("%s\n", argv[0]);
-	char *path[4] = { "--main-pack", "sdmc:/3ds/godot.3ds.template_debug.arm32.elf.pck", "--resolution", "240x400" };
-	Error err = Main::setup(argv[0], 4, path);
+	const char *path[3] = { "--main-pack", "romfs:/Game.pck", "--headless" };
+	
+	Error err = Main::setup(argv[0], 3, (char**)path);
 	if (err != OK) {
 		printf("The error of setup was %i\n", err);
 		if (err == ERR_HELP) { // Returned by --help and --version, so success.
@@ -23,9 +22,12 @@ int main(int argc, char *argv[]) {
 		}
 		return err;
 	}
-	if (Main::start()) {
-		os.set_exit_code(EXIT_SUCCESS);
+	if (Main::start() == EXIT_SUCCESS) {
+		
 		os.run();
+	}
+	else {
+		os.set_exit_code(EXIT_FAILURE);
 	}
 	Main::cleanup();
 	printf("Exit code : %d\n", os.get_exit_code());

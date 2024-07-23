@@ -66,6 +66,8 @@ private:
 
 	static ID main_thread_id;
 
+
+
 	static uint64_t _thread_id_hash(const Handle &p_t);
 
 	ID id = _thread_id_hash(0);
@@ -77,6 +79,10 @@ private:
 	static PlatformFunctions platform_functions;
 
 public:
+	enum : ID {
+		UNASSIGNED_ID = 0,
+		MAIN_ID = 1
+	};
 	static void _set_platform_functions(const PlatformFunctions &p_functions);
 
 	_FORCE_INLINE_ ID get_id() const { return id; }
@@ -89,9 +95,11 @@ public:
 
 	void start(Thread::Callback p_callback, void *p_user, const Settings &p_settings = Settings());
 	bool is_started() const;
+	_FORCE_INLINE_ static bool is_main_thread() { return caller_id == MAIN_ID; }
 	///< waits until thread is finished, and deallocates it.
 	void wait_to_finish();
-
+	static void make_main_thread() { caller_id = MAIN_ID; }
+	static void release_main_thread() { caller_id = UNASSIGNED_ID; }
 	Thread();
 	~Thread();
 };

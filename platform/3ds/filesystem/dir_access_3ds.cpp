@@ -202,12 +202,12 @@ int DirAccess3DS::get_drive_count() {
 }
 
 String DirAccess3DS::get_drive(int p_drive) {
-	List<String> list;
+		List<String> list;
 	_get_drives(&list);
 
 	ERR_FAIL_INDEX_V(p_drive, list.size(), "");
 
-	return list[p_drive];
+	return list.get(p_drive);
 }
 
 int DirAccess3DS::get_current_drive() {
