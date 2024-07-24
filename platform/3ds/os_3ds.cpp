@@ -6,7 +6,7 @@
 #include "servers/rendering_server.h"
 #include "filesystem/file_access_3ds.h"
 #include "filesystem/dir_access_3ds.h"
-#include "scene/main/scene_tree.h"
+#include "servers/rendering/display_server_3ds.h"
 #include <time.h>
 
 static aptHookCookie apt_hook_cookie;
@@ -29,7 +29,7 @@ void OS_3DS::initialize_core() {
     romfsInit();
 	gfxInitDefault();
 	consoleInit(GFX_BOTTOM, NULL);
-    
+
     ticks_start = svcGetSystemTick();
     FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_RESOURCES);
 	FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_USERDATA);
@@ -38,7 +38,8 @@ void OS_3DS::initialize_core() {
     DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_RESOURCES);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_USERDATA);
 	DirAccess::make_default<DirAccess3DS>(DirAccess::ACCESS_FILESYSTEM);
-    //DisplayServer3DS::register_citro3d_driver();
+
+    DisplayServer3DS::register_3ds_driver();
 }   
 
 void OS_3DS::finalize() {
@@ -54,7 +55,9 @@ void OS_3DS::finalize_core() {
 void OS_3DS::initialize() {
     main_loop = nullptr;
     initialize_core();
-    
+    set_current_rendering_driver_name("3ds");
+    set_current_rendering_method("3ds");
+    set_display_driver_id(0);
 }
 
 void OS_3DS::initialize_joypads() {
@@ -101,7 +104,7 @@ void OS_3DS::delete_main_loop() {
 }
 
 uint64_t OS_3DS::get_static_memory_usage() const {
-    return osGetMemRegionUsed(MEMREGION_APPLICATION) ;
+    return get_static_memory_peak_usage() - get_free_static_memory();
 }
 uint64_t OS_3DS::get_static_memory_peak_usage() const{
     return osGetMemRegionSize(MEMREGION_APPLICATION);
@@ -118,7 +121,9 @@ Vector<String> OS_3DS::get_video_adapter_driver_info() const {
     if (RenderingServer::get_singleton()->get_rendering_device() == nullptr) {
 		return Vector<String>();
 	}
-    return Vector<String>();
+    Vector<String> vec = Vector<String>();
+    vec.push_back(String("3ds"));
+    return vec;
 }
 
 String OS_3DS::get_stdin_string() {
