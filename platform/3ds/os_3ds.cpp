@@ -6,7 +6,7 @@
 #include "servers/rendering_server.h"
 #include "filesystem/file_access_3ds.h"
 #include "filesystem/dir_access_3ds.h"
-#include "servers/rendering/display_server_3ds.h"
+#include "servers/display/display_server_3ds.h"
 #include <time.h>
 
 static aptHookCookie apt_hook_cookie;

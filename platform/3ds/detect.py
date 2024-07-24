@@ -162,10 +162,10 @@ def configure_cross(env):
 			   "/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
 	env.Append(LIBPATH=[dkp_path+"/portlibs/armv6k/lib", dkp_path +
 						"/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])
-	env.Append(LINKFLAGS=['-specs=3dsx.specs', '-march=armv6k',
+	env.Append(LINKFLAGS=['-Wl,-S', '-Wl,-x','-specs=3dsx.specs', '-march=armv6k',
 			   '-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard'])
 	env.Append(CCFLAGS=['-U__INT32_TYPE__', '-U__UINT32_TYPE__', '-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int', '-U__UINT32_MAX__', '-U__INT32_MAX__','-D__UINT32_MAX__=4294967295U', '-D__INT32_MAX__=2147483647'])
- 
+	env.Append(CCFLAGS=['-DDISABLE_DEPRECATED'])
 	if env["target"] == "template_debug":
 		env.Append(LIBS=['citro3dd', 'ctrud', 'freetype', 'bz2', 'png', 'z'])
 	else:
