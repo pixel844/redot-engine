@@ -152,7 +152,7 @@ def configure_cross(env):
 	env["OBJCOPY"] = triple + "-objcopy"
 	env["PROGSUFFIX"] = ".elf"
 	env["SHLIBSUFFIX"] = ".so"
-	env.Append(CPPPATH=['#platform/3ds'])
+	env.Append(CPPPATH=['#platform/3ds','#platform/3ds/threading'])
 	env.Append(CCFLAGS=['-Wall', '-mword-relocations', '-ffunction-sections',
 			   '-fdata-sections', '-fno-exceptions', '-Wl,-dead_strip'])
 	env.Append(CCFLAGS=['-D__3DS__','-ffast-math', '-DLIBC_FILEIO_ENABLED', '-DNO_SAFE_CAST','-Wno-parentheses','-Wno-implicit-function-declaration',
