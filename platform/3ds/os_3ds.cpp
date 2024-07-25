@@ -6,7 +6,7 @@
 #include "servers/rendering_server.h"
 #include "filesystem/file_access_3ds.h"
 #include "filesystem/dir_access_3ds.h"
-#include "servers/display/display_server_3ds.h"
+#include "servers/display_server_3ds.h"
 #include <time.h>
 
 static aptHookCookie apt_hook_cookie;
@@ -27,8 +27,6 @@ void OS_3DS::initialize_core() {
     psInit();
     archiveMountSdmc();
     romfsInit();
-	gfxInitDefault();
-	consoleInit(GFX_BOTTOM, NULL);
 
     ticks_start = svcGetSystemTick();
     FileAccess::make_default<FileAccess3DS>(FileAccess::ACCESS_RESOURCES);
@@ -75,12 +73,6 @@ void OS_3DS::run() {
     while (!Main::iteration())
     {
         DisplayServer::get_singleton()->process_events();
-        gspWaitForVBlank();
-        gfxSwapBuffers();
-        hidScanInput();
-        u32 kDown = hidKeysDown();
-        if (kDown & KEY_START)
-            SceneTree::get_singleton()->quit(EXIT_SUCCESS);
     }
     
     main_loop->finalize();
@@ -121,9 +113,7 @@ Vector<String> OS_3DS::get_video_adapter_driver_info() const {
     if (RenderingServer::get_singleton()->get_rendering_device() == nullptr) {
 		return Vector<String>();
 	}
-    Vector<String> vec = Vector<String>();
-    vec.push_back(String("3ds"));
-    return vec;
+    return Vector<String>();
 }
 
 String OS_3DS::get_stdin_string() {

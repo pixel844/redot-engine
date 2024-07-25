@@ -5,15 +5,15 @@
 #include <sys/resource.h>
 #include <filesystem>
 
-int __stacksize__ = STACKSIZE * 8;
+int __stacksize__ = STACKSIZE * 16;
 
 int main(int argc, char *argv[]) {
 	OS_3DS os;
 	setlocale(LC_CTYPE, "");
 	std::string without_filename = std::filesystem::path(argv[0]).remove_filename();
 	chdir(without_filename.c_str());
-	const char *path[6] = { "--main-pack", "romfs:/Game.pck", "--display-driver", "3ds", "--audio-driver", "Dummy" };
-	Error err = Main::setup(argv[0], 6, (char**)path);
+	const char *path[8] = { "--main-pack", "romfs:/Game.pck", "--display-driver", "3ds", "--audio-driver", "Dummy", "--resolution", "240x400" };
+	Error err = Main::setup(argv[0], 8, (char**)path);
 	if (err != OK) {
 		printf("The error of setup was %i\n", err);
 		if (err == ERR_HELP) { // Returned by --help and --version, so success.

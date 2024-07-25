@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+Import('env')
+
+shaders = [
+    '2d',
+    '3d',
+]
+
+if 'PICA' in env['BUILDERS']:
+    for shader in shaders:
+        env.PICA(shader)
+        env.PICA_HEADER(shader)
+
+source_files = [
+    "renderer_3ds.cpp",
+    "renderer_scene_3ds.cpp"
+]
+
+objects = []
+
+for source_file in source_files:
+    objects.append(env.Object(source_file))
+objects.append(SConscript("storage/SCsub"))
+Return("objects")

@@ -1,17 +1,4 @@
-# detect_godot4.py
-#
-# FRT - A Godot platform targeting single board computers
-# Copyright (c) 2017-2023  Emanuele Fornara
-# SPDX-License-Identifier: MIT
-#
-
 import os
-import sys
-import platform
-import version
-
-# TODO factor out common bits
-
 
 def is_active():
 	return True
@@ -24,6 +11,8 @@ def get_name():
 def can_build():
 	return True
 
+def dummy_validator(key, val, env):
+    return True
 
 def get_opts():
 	from SCons.Variables import BoolVariable
@@ -45,7 +34,7 @@ def get_opts():
 		BoolVariable("use_safe_heap",
 					 "Use Emscripten SAFE_HEAP sanitizer", False),
 		BoolVariable("no_strip","",True),
-		PathVariable("devkitpro","The path of the devkitpro SDK","")
+		PathVariable("devkitpro","The path of the devkitpro SDK","",dummy_validator)
 		
 	]
 
@@ -134,13 +123,48 @@ def configure_arch(env):
 			   '-mfpu=vfp', '-mfloat-abi=hard'])
 
 
+def get_devkitpro_path(env):
+	print("Locating the required devkitPro sdk")
+	dkp_path = os.environ.get("DEVKITPRO",None) 
+	if not os.path.isdir(dkp_path):
+		print ("The devkitpro path specified by the DEVKITPRO env variable does not exist.")
+		dkp_path = env.get("devkitpro","")
+		if dkp_path == "":
+			print("Please provide the path of devkitpro using the option devkitpro.")
+			print("scons platform=3ds devkitpro=C:\\path\\to\\devkitpro.")
+	return dkp_path
+
+def verify_devkitpro_install(dkp_path):
+	if not os.path.isdir(dkp_path):
+		return False
+	if (not os.path.isfile(dkp_path + "/" + "devkitARM/3ds_rules")):
+		print("Although the devkitPro path exists, you have not installed devkitARM.")
+		return False
+	if (not os.path.isfile(dkp_path + "/libctru/lib/libcitro3d.a") or not os.path.isfile(dkp_path + "/libctru/lib/libctru.a")):
+		print("Although devkitpro exists, you have not installed the 3DS development libraries.")
+		return False
+	if (not os.path.isfile(dkp_path + "/portlibs/3ds/lib/libfreetype.a")):
+		print("Although the devkitPro path exists, you have not installed 3ds-freetype.")
+		return False
+	if (not os.path.isfile(dkp_path + "/portlibs/3ds/lib/libz.a")):
+		print("Although the devkitPro path exists, you have not installed 3ds-zlib.")
+		return False
+	if (not os.path.isfile(dkp_path + "/tools/bin/3dsxtool.exe") and not os.path.isfile(dkp_path + "/tools/bin/3dsxtool")):
+		print("Although the devkitPro path exists, you do not have 3dsxtool installed.")
+		return False
+	if (not os.path.isfile(dkp_path + "/tools/bin/smdhtool.exe") and not os.path.isfile(dkp_path + "/tools/bin/smdhtool")):
+		print("Although the devkitPro path exists, you do not have smdhtool installed.")
+		return False
+	if (not os.path.isfile(dkp_path + "/tools/bin/picasso.exe") and not os.path.isfile(dkp_path + "/tools/bin/picasso")):
+		print("Although the devkitPro path exists, you do not have picasso installed.")
+		return False
+	return True
+
 def configure_cross(env):
-	dkp_path = env["devkitpro"]
-	if dkp_path == "":
-		print("DEVKITPRO PATH NOT SPECIFIED")
+	dkp_path = get_devkitpro_path(env)
+	if not verify_devkitpro_install(dkp_path):
 		exit(1)
-	else:
-		print("DEVKITPRO PATH IS : " + dkp_path)
+	print("The devkitpro path used is : {0}.".format(dkp_path))
 	triple = dkp_path + '/devkitARM/bin/arm-none-eabi'
 	env['CC'] = triple + '-gcc'
 	env['CXX'] = triple + '-g++'
@@ -154,22 +178,19 @@ def configure_cross(env):
 	env["SHLIBSUFFIX"] = ".so"
 	env.Append(CPPPATH=['#platform/3ds','#platform/3ds/threading'])
 	env.Append(CCFLAGS=['-Wall', '-mword-relocations', '-ffunction-sections',
-			   '-fdata-sections', '-fno-exceptions', '-Wl,-dead_strip'])
+			   '-fdata-sections', '-fno-exceptions'])
 	env.Append(CCFLAGS=['-D__3DS__','-ffast-math', '-DLIBC_FILEIO_ENABLED', '-DNO_SAFE_CAST','-Wno-parentheses','-Wno-implicit-function-declaration',
-			    '-D_XOPEN_SOURCE=500', '-DRW_LOCK_H','-DUNIX_SOCKET_UNAVAILABLE','-Wincompatible-pointer-types'])
+				'-D_XOPEN_SOURCE=500', '-DRW_LOCK_H','-DUNIX_SOCKET_UNAVAILABLE','-Wincompatible-pointer-types'])
 
 	env.Append(CPPPATH=[dkp_path + "/portlibs/3ds/include", dkp_path + "/portlibs/3ds/include/freetype2", dkp_path +
 			   "/portlibs/armv6k/include", dkp_path + "/libctru/include", dkp_path + "/devkitARM/arm-none-eabi/include"])
 	env.Append(LIBPATH=[dkp_path+"/portlibs/armv6k/lib", dkp_path +
 						"/portlibs/3ds/lib", dkp_path + "/libctru/lib", dkp_path + "/arm-none-eabi/lib/armv6k/fpu"])
-	env.Append(LINKFLAGS=['-Wl,-S', '-Wl,-x','-specs=3dsx.specs', '-march=armv6k',
+	env.Append(LINKFLAGS=['-specs=3dsx.specs', '-march=armv6k',
 			   '-mtp=soft', '-mfpu=vfp', '-mfloat-abi=hard'])
 	env.Append(CCFLAGS=['-U__INT32_TYPE__', '-U__UINT32_TYPE__', '-D__INT32_TYPE__=int','-D__UINT32_TYPE__=unsigned int', '-U__UINT32_MAX__', '-U__INT32_MAX__','-D__UINT32_MAX__=4294967295U', '-D__INT32_MAX__=2147483647'])
 	env.Append(CCFLAGS=['-DDISABLE_DEPRECATED'])
-	if env["target"] == "template_debug":
-		env.Append(LIBS=['citro3dd', 'ctrud', 'freetype', 'bz2', 'png', 'z'])
-	else:
-		env.Append(LIBS=['citro3d', 'ctru', 'freetype', 'bz2', 'png', 'z'])
+	env.Append(LIBS=['citro3d', 'ctru', 'freetype', 'png', 'z'])
 
 
 def configure_misc(env):

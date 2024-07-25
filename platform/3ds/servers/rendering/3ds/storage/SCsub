@@ -1,0 +1,18 @@
+#!/usr/bin/env python
+
+Import("env")
+
+source_files = [
+    "mesh_storage.cpp",
+    "texture_storage.cpp",
+    "material_storage.cpp",
+    "utilities.cpp",
+    "render_scene_buffers_3ds.cpp"
+]
+
+objects = []
+
+for source_file in source_files:
+    objects.append(env.Object(source_file))
+
+Return("objects")

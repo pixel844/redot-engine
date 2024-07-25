@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+Import('env')
+
+source_files = [
+    "display_server_3ds.cpp"
+]
+
+objects = []
+
+for source_file in source_files:
+    objects.append(env.Object(source_file))
+objects.append(SConscript("rendering/SCsub"))
+Return("objects")
