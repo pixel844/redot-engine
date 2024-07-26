@@ -37,32 +37,26 @@
 
 namespace Renderer3DS {
 struct Texture {
-	uint32_t flags;
-	int width, height;
-	C3D_Tex tex;
-	Image::Format format;
+	uint32_t flags = 0U;
+	int width = 0, height = 0;
+	C3D_Tex *tex{};
+	Image::Format format{Image::FORMAT_RGB8};
 	Ref<Image> image;
-	Texture() {
-		tex.data = NULL;
-		flags = width = height = 0;
-		format = Image::FORMAT_L8;
-	}
 };
 struct RenderTarget {
-	Texture *texture_ptr;
 	RID texture;
-	C3D_RenderTarget *target;
+	C3D_RenderTarget *target = nullptr;
 	uint32_t view_count = 1;
 	Size2i size;
-	bool clear_requested;
+	bool clear_requested = false;
 	Color clear_color;
-	bool direct_to_screen;
+	bool direct_to_screen = false;
 };
 class TextureStorage : public RendererTextureStorage {
 private:
 	static TextureStorage *singleton;
 
-	mutable RID_PtrOwner<Texture> texture_owner;
+	mutable RID_Owner<Texture,true> texture_owner;
 
 public:
 	static TextureStorage *get_singleton() {
@@ -70,7 +64,7 @@ public:
 	};
 
 	TextureStorage();
-	~TextureStorage();
+	~TextureStorage() override;
 
 	virtual bool can_create_resources_async() const override { return false; }
 
@@ -88,11 +82,10 @@ public:
 
 	/* Texture API */
 
-	bool owns_texture(RID p_rid) { return texture_owner.owns(p_rid); };
+	bool owns_texture(RID p_rid) const { return texture_owner.owns(p_rid); };
 
 	virtual RID texture_allocate() override {
-		Texture *texture = memnew(Texture);
-		ERR_FAIL_COND_V(!texture, RID());
+		Texture texture;
 		return texture_owner.make_rid(texture);
 	};
 
@@ -122,7 +115,7 @@ public:
 	virtual void texture_2d_layered_placeholder_initialize(RID p_texture, RenderingServer::TextureLayeredType p_layered_type) override{};
 	virtual void texture_3d_placeholder_initialize(RID p_texture) override{};
 
-	virtual Ref<Image> texture_2d_get(RID p_texture) const override {
+	virtual Ref<Image> texture_2d_get(const RID p_texture) const override {
 		Texture *t = texture_owner.get_or_null(p_texture);
 		ERR_FAIL_COND_V(!t, Ref<Image>());
 		return t->image;
@@ -182,8 +175,9 @@ public:
 
 	/* RENDER TARGET */
 	mutable RID_Owner<RenderTarget> render_target_owner;
-	RenderTarget *get_render_target(RID p_rid) { return render_target_owner.get_or_null(p_rid); };
-	bool owns_render_target(RID p_rid) { return render_target_owner.owns(p_rid); };
+	RenderTarget *get_render_target(RID p_rid) const;
+	;
+	bool owns_render_target(const RID p_rid) const { return render_target_owner.owns(p_rid); };
 
 	virtual RID render_target_create() override;
 	virtual void render_target_free(RID p_rid) override;

@@ -43,20 +43,25 @@ TextureStorage::~TextureStorage() {
 	singleton = nullptr;
 }
 
+RenderTarget *TextureStorage::get_render_target(const RID p_rid) const {
+	return render_target_owner.get_or_null(p_rid);
+}
+
 RID TextureStorage::render_target_create() {
-	RenderTarget rt;
-	Texture *tex = memnew(Texture);
-	rt.target = C3D_RenderTargetCreate(4, 4, GPU_RB_RGBA8, GPU_RB_DEPTH24_STENCIL8);
-	C3D_RenderTargetClear(rt.target, C3D_CLEAR_ALL, 0x00FFFFFF, 0);
+	const Texture tex{};
+	RenderTarget rt{};
+	ERR_FAIL_COND_V_MSG(!C3D_TexInitVRAM(tex.tex,4,4,GPU_RGB8),RID(),"The texture couldn't be created!");
+	rt.target = C3D_RenderTargetCreateFromTex(tex.tex,GPU_TEXFACE_2D,0,GPU_RB_DEPTH24_STENCIL8);
+	ERR_FAIL_COND_V_MSG(!rt.target, RID(),"Couldnt create the render target from the texture!");
 	rt.view_count = 1;
 	rt.size = Size2i{ 4, 4 };
-	rt.texture_ptr = tex;
 	rt.texture = texture_owner.make_rid(tex);
 	return render_target_owner.make_rid(rt);
 }
 
 void TextureStorage::render_target_free(RID p_rid) {
 	RenderTarget *rt = render_target_owner.get_or_null(p_rid);
+	ERR_FAIL_NULL_V_MSG(rt,,"The render target is null!");
 	C3D_RenderTargetDelete(rt->target);
 	rt->target = nullptr;
 }
@@ -71,7 +76,7 @@ void TextureStorage::render_target_set_size(RID p_render_target, int p_width, in
 }
 
 Size2i TextureStorage::render_target_get_size(RID p_render_target) const {
-	RenderTarget *rt = render_target_owner.get_or_null(p_render_target);
+	const RenderTarget *rt = render_target_owner.get_or_null(p_render_target);
 	return rt->size;
 }
 
